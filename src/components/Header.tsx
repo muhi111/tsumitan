@@ -2,14 +2,15 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-10 bg-slate-50/80 backdrop-blur-sm shadow-sm">
       <div className="w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center py-4">
-          <button className="text-slate-700 p-2 -ml-2">
-            <span className="material-icons">arrow_back_ios_new</span>
-          </button>
-          <h1 className="text-slate-900 text-xl md:text-2xl font-bold flex-1 text-center pr-10">
+        
+          {/*<button className="text-slate-700 p-2 -ml-2">
+            {/*<span className="material-icons">arrow_back_ios_new</span>
+          </button>*/}
+          <div className="flex items-center pt-4 mb-4">
+          <h1 className="text-slate-900 text-xl md:text-2xl font-bold flex-1 text-center mt-4">
             Dictionary
           </h1>
-        </div>
+          </div>
 
         <div className="pb-4">
           <div className="relative">
