@@ -1,8 +1,9 @@
+//画面　真ん中部分　辞書検索のやつ
 import { useState } from "react";
-import Modal from "./Modal";
+import Modal from "../components/Modal";
 
 // MainComponents.tsx
-const MainComponents = () => {
+const DictionaryPage = () => {
   // モックデータとして類義語
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -94,4 +95,4 @@ const MainComponents = () => {
   );
 };
 
-export default MainComponents;
+export default DictionaryPage;
