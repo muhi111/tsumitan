@@ -1,0 +1,3 @@
+.h-safe-area-bottom {
+  height: env(safe-area-inset-bottom);
+}
