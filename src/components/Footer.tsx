@@ -1,18 +1,25 @@
+//レスポンシブ 
+//PCいじょう　→サイドバーで画面遷移 縦並び びみょい?
+
+import { Link, useLocation } from "react-router-dom";
+
+//それ以下→ 画面の最下層に固定　横並び
 type NavItem = {
   icon: string;
   label: string;
-  active?: boolean;
+  path: string;
 };
 
   //MUIIcons
 const navItems: NavItem[] = [    
-  { icon: 'home', label: 'Home' },
-  { icon: 'school', label: 'Learn' },
-  { icon: 'import_contacts', label: 'Dictionary', active: true },
-  { icon: 'person_outline', label: 'Profile' },
+  { icon: 'home', label: 'Home', path: '/home' },
+  { icon: 'school', label: 'Learn' ,path: '/learn' },
+  { icon: 'import_contacts', label: 'Dictionary', path: '/dictionary'},
+  { icon: 'person_outline', label: 'Profile', path: '/profile' },
 ];
 
 const Footer = () => {
+     const location = useLocation(); // ◀️ 現在のURL情報を取得
   return (
       <footer
       className={`
@@ -20,7 +27,7 @@ const Footer = () => {
         
         
         /* --- モバイル (デフォルト) のスタイル: フッター --- */
-        
+
         w-full sticky bottom-0 
         bg-slate-50/80 backdrop-blur-sm 
         border-t border-slate-200
@@ -52,24 +59,29 @@ const Footer = () => {
           lg:flex-col lg:justify-start lg:px-0 lg:py-4 lg:mx-0 lg:h-full lg:gap-1
         `}
       >
-        {navItems.map(({ icon, label, active }) => (
-          <a
+        {navItems.map(({ icon, label, path }) => {
+            const isActive = location.pathname === path; // ◀️ 現在のパスとアイテムのパスを比較してactive状態を決定
+            return(
+          <Link
             key={label}
+            to={path}
             className={`
               flex flex-1 flex-col items-center justify-end gap-0.5 py-1 group
-              ${active ? 'text-blue-500' : 'text-slate-500 hover:text-blue-400 lg:hover:bg-slate-100 lg:hover:text-slate-700'}
+              ${isActive ? 'text-blue-500' : 'text-slate-500 hover:text-blue-400 lg:hover:bg-slate-100 lg:hover:text-slate-700'}
               /* PC (lg以上) のリンクスタイル */
               lg:flex-row lg:items-center lg:justify-start lg:flex-none 
               lg:px-6 lg:py-3 lg:gap-3
             `}
-            href="#" // 適切なパスに変更してください
+           
           >
-            <span className="material-icons text-2xl lg:text-xl group-hover:lg:text-blue-500">{icon}</span>
+              <span className={`material-icons text-2xl lg:text-xl ${isActive ? 'lg:text-blue-500' : 'group-hover:lg:text-blue-500'}`}> {/* ◀️ PC時のアクティブなアイコン色 */}
+                {icon}</span>
             <p className="text-[0.7rem] sm:text-xs font-medium tracking-wide lg:text-sm">
               {label}
             </p>
-          </a>
-        ))}
+          </Link>
+        );
+    })}
       </nav>
       {/* モバイル用のセーフエリアはPCでは非表示 */}
       <div className="h-safe-area-bottom bg-slate-50 lg:hidden" />

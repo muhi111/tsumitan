@@ -1,7 +1,18 @@
+import { useState } from "react";
+import Modal from "./Modal";
+
 // MainComponents.tsx
 const MainComponents = () => {
-  // モックデータとして類義語のリストを定義
+  // モックデータとして類義語
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
   const synonyms: string[] = ["lexicon", "terminology", "word-stock", "glossary"];
+
+    const handleAddClick = () => {
+    // ここで単語帳に追加する処理を入れてもよい 6/03　/17:13　現在どこのやつにその単語帳をいれるのか迷うなう
+    setIsModalOpen(true);
+  };
+
 
   return (
     <main className="w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-6">
@@ -46,6 +57,39 @@ const MainComponents = () => {
           </p>
         )}
       </section>
+
+
+             {/*これらの結局何がしたいか→モーダルでどの単語帳かを選択可能にする→リストみたいなものに保存していく感じ？*/}
+
+
+            <section className="bg-white p-5 rounded-xl shadow-sm">
+        <h3 
+        className="text-slate-800 text-lg font-semibold leading-tight tracking-tight">
+          単語帳に追加する
+          </h3>
+        <p className="text-slate-700 text-base font-normal leading-relaxed mt-2 italic"></p>
+        <div className="flex justify-center items-center">
+        <button 
+        type="button"
+        className=" w-1/2 flex justify-center items-center w-1/2 mt-4 py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200"
+        onClick={handleAddClick}>
+          追加
+        </button>
+        </div>
+      </section>
+            {isModalOpen && (
+        <Modal onClose={() => setIsModalOpen(false)}>
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-auto text-center">
+            <h2 className="text-lg font-bold mb-4">単語帳に追加しました！</h2>
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className=" flex justify-center items-center w-1/2 mt-4 py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            >
+              閉じる
+            </button>
+          </div>
+        </Modal>
+      )}
     </main>
   );
 };

@@ -1,4 +1,15 @@
+import { useAtom } from "jotai";
+import { search } from "../atoms";
+
 const Header = () => {
+
+  const [searchValue,setSearchValue] = useAtom(search)
+
+  const handleClearSearch = () => {
+    setSearchValue(''); //検索フォームのリセット
+  };
+
+//辞書で調べたら
   return (
     <header className="sticky top-0 z-10 bg-slate-50/80 backdrop-blur-sm shadow-sm">
       <div className="w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -14,18 +25,22 @@ const Header = () => {
 
         <div className="pb-4">
           <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"> 
               <span className="material-icons text-slate-500">search</span>
             </div>
             <input
-              className="form-input block w-full rounded-xl border-0 bg-slate-100 py-3 pl-10 pr-10 text-slate-900 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm"
+              className="form-input block w-full rounded-xl border-0 bg-slate-100 py-3 pl-10 pr-10 text-slate-900 placeholder:text-slate-500 focus:ring-2 focus:ring-inset focus:ring-blue-500 transition focus:outline-none sm:text-sm"
               placeholder="Search for a word..."
               type="text"
-              defaultValue="Vocabulary"
+              value={searchValue}
+              onChange={(e)=>setSearchValue(e.target.value)}
             />
-            <button className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-700">
+            {searchValue && ( //クリアボタンの表示
+            <button
+            onClick={handleClearSearch}
+             className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-700">
               <span className="material-icons">clear</span>
-            </button>
+            </button>)}
           </div>
         </div>
       </div>
