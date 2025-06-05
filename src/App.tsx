@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage';
 import LearnPage from './pages/LearnPage';
 import DictionaryPage from './pages/DictionaryPage'; // MainComponentsから変更
 import ProfilePage from './pages/ProfilePage';
+import WordbookDetail from './pages/WordbookDetail';
 
 // Appコンポーネントの内部でHeaderの表示を制御するためのコンポーネント
 const AppContent = () => {
@@ -24,6 +25,7 @@ const AppContent = () => {
               <Route path="/" element={<Navigate to="/dictionary" replace />} />
               <Route path="/home" element={<HomePage />} />
               <Route path="/learn" element={<LearnPage />} />
+              <Route path="/learn/:id" element={<WordbookDetail />} />
               <Route path="/dictionary" element={<DictionaryPage />} /> {/* DictionaryPageを使用 */}
               <Route path="/profile" element={<ProfilePage />} />
             </Routes>

@@ -6,11 +6,15 @@ import Modal from "../components/Modal";
 const DictionaryPage = () => {
   // モックデータとして類義語
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const synonyms: string[] = ["lexicon", "terminology", "word-stock", "glossary"];
 
-    const handleAddClick = () => {
+
+  const handleAddClick = () => {
     // ここで単語帳に追加する処理を入れてもよい 6/03　/17:13　現在どこのやつにその単語帳をいれるのか迷うなう
+    // 検索された回数ごとに分ける？　6/04/11:12 
+ 
+    
     setIsModalOpen(true);
   };
 
