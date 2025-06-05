@@ -7,12 +7,12 @@ import HomePage from './pages/HomePage';
 import LearnPage from './pages/LearnPage';
 import DictionaryPage from './pages/DictionaryPage'; // MainComponentsから変更
 import ProfilePage from './pages/ProfilePage';
-import WordbookDetail from './pages/WordbookDetail';
+
 
 // Appコンポーネントの内部でHeaderの表示を制御するためのコンポーネント
 const AppContent = () => {
   const location = useLocation(); //  現在のURL情報を取得
-  const showHeader = location.pathname === '/dictionary'; // /dictionary の時だけHeaderを表示
+  const showHeader = ['/home'].includes(location.pathname); //homeの時だけHeaderを表示
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-['Newsreader','Noto_Sans',sans-serif]">
@@ -25,7 +25,6 @@ const AppContent = () => {
               <Route path="/" element={<Navigate to="/dictionary" replace />} />
               <Route path="/home" element={<HomePage />} />
               <Route path="/learn" element={<LearnPage />} />
-              <Route path="/learn/:id" element={<WordbookDetail />} />
               <Route path="/dictionary" element={<DictionaryPage />} /> {/* DictionaryPageを使用 */}
               <Route path="/profile" element={<ProfilePage />} />
             </Routes>
