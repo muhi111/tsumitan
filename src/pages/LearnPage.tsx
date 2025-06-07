@@ -2,37 +2,104 @@ import React, { useEffect, useState } from "react";
 
 type Status = "all" | "unchecked" | "correct" | "wrong";
 
-const wordbook = {
-  id: 1,
-  name: "単語帳",
-  words: ["apple", "banana", "orange", "schedule", "confirm"],
-  meaning: ["リンゴ", "バナナ", "オレンジ", "予定", "確認"],
+type Word = {
+  word: string;
+  search_count: number;
+  review_count?: number;
+  last_reviewed?: string;
+  meaning?: string;
 };
 
-const WordbookDetail: React.FC = () => {
-  const [flippedStates, setFlippedStates] = useState<boolean[]>(
-    new Array(wordbook.words.length).fill(false)
-  );
+type WordWithStatus = Word & { status: Status };
 
-  const [statusStates, setStatusStates] = useState<
-    ("unchecked" | "correct" | "wrong")[]
-  >(new Array(wordbook.words.length).fill("unchecked"));
+interface ReviewRequest {
+  word: string;
+}
 
+const LearnPage: React.FC = () => {
+  const [words, setWords] = useState<WordWithStatus[]>([]);
+  const [flippedStates, setFlippedStates] = useState<boolean[]>([]);
   const [showStatus, setShowStatus] = useState<Status>("all");
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // フィルター処理
-  const visibleWords = wordbook.words
-    .map((word, index) => ({
-      word,
-      meaning: wordbook.meaning[index],
-      index,
-    }))
-    .filter(({ index }) =>
-      showStatus === "all" ? true : statusStates[index] === showStatus
+  // 意味取得API
+  const fetchMeaning = async (word: string, token: string): Promise<string> => {
+    try {
+      const res = await fetch(
+        `http://localhost:8080/api/search?word=${encodeURIComponent(word)}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!res.ok) throw new Error("意味の取得に失敗");
+      const data = await res.json();
+      return data.meanings || "";
+    } catch (err) {
+      console.error(`意味取得失敗 (${word}):`, err);
+      return "";
+    }
+  };
+
+  // 単語＋意味の取得
+  useEffect(() => {
+    const fetchAllWords = async () => {
+      const token = "1"; // 仮トークン
+      try {
+        const [pendingRes, reviewedRes] = await Promise.all([
+          fetch("http://localhost:8080/api/review/pending", {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch("http://localhost:8080/api/review/history", {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+        ]);
+
+        if (!pendingRes.ok || !reviewedRes.ok)
+          throw new Error("単語取得に失敗しました");
+
+        const pendingWords: Word[] = await pendingRes.json();
+        const reviewedWords: Word[] = await reviewedRes.json();
+
+        const allWords = [
+          ...pendingWords.map((w) => ({ ...w, status: "unchecked" as const })),
+          ...reviewedWords.map((w) => ({ ...w, status: "correct" as const })),
+        ];
+
+        const withMeanings = await Promise.all(
+          allWords.map(async (w) => ({
+            ...w,
+            meaning: await fetchMeaning(w.word, token),
+          }))
+        );
+
+        setWords(withMeanings);
+        setFlippedStates(new Array(withMeanings.length).fill(false));
+      } catch (err) {
+        console.error("単語取得エラー:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllWords();
+  }, []);
+
+  const visibleWords = words
+    .map((word, index) => ({ ...word, index }))
+    .filter(({ status }) =>
+      showStatus === "all" ? true : status === showStatus
     );
 
-  // 表裏反転
   const toggleFlip = (index: number) => {
     setFlippedStates((prev) => {
       const updated = [...prev];
@@ -41,23 +108,42 @@ const WordbookDetail: React.FC = () => {
     });
   };
 
-  // ステータス更新
-  const updateStatus = (index: number, newStatus: "correct" | "wrong") => {
-    setStatusStates((prev) => {
+  const updateStatus = async (
+    index: number,
+    newStatus: "correct" | "wrong"
+  ) => {
+    const wordToUpdate = words[index];
+    setWords((prev) => {
       const updated = [...prev];
-      updated[index] = newStatus;
+      updated[index] = { ...updated[index], status: newStatus };
       return updated;
     });
 
-    // フィードバック表示
-    if (newStatus === "correct") {
-      setFeedback("✅ よくできました！この調子✨");
-    } else if (newStatus === "wrong") {
-      setFeedback("❌ 間違えても大丈夫！次に活かそう💪");
+    setFeedback(
+      newStatus === "correct"
+        ? "✅ よくできました！この調子✨"
+        : "❌ 間違えても大丈夫！次に活かそう💪"
+    );
+
+    try {
+      const token = "1"; // 仮トークン
+      const requestBody: ReviewRequest = { word: wordToUpdate.word };
+
+      const response = await fetch("http://localhost:8080/api/review", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) throw new Error("復習記録の送信に失敗しました");
+    } catch (err) {
+      console.error("復習記録送信エラー:", err);
     }
   };
 
-  // フィードバック自動消去
   useEffect(() => {
     if (feedback) {
       const timeout = setTimeout(() => setFeedback(null), 2000);
@@ -65,20 +151,25 @@ const WordbookDetail: React.FC = () => {
     }
   }, [feedback]);
 
+  const statusLabels: Record<Status, string> = {
+    all: "すべて",
+    unchecked: "未復習",
+    correct: "復習済み",
+    wrong: "苦手",
+  };
+
   return (
     <div className="p-4 relative">
-      <h2 className="text-2xl font-bold mb-4">{wordbook.name}</h2>
+      <h2 className="text-2xl font-bold mb-4">単語帳</h2>
 
-      {/* フィードバック */}
       {feedback && (
         <div className="absolute top-4 right-4 bg-white border border-blue-300 text-blue-700 px-4 py-2 rounded shadow-md animate-fade-in">
           {feedback}
         </div>
       )}
 
-      {/* ステータス切り替え */}
       <div className="flex flex-wrap gap-2 mb-4">
-        {(["all", "unchecked", "correct", "wrong"] as Status[]).map((status) => (
+        {(Object.keys(statusLabels) as Status[]).map((status) => (
           <button
             key={status}
             className={`px-4 py-2 rounded ${
@@ -86,68 +177,67 @@ const WordbookDetail: React.FC = () => {
             }`}
             onClick={() => {
               setShowStatus(status);
-              setFlippedStates(new Array(wordbook.words.length).fill(false));
+              setFlippedStates(new Array(words.length).fill(false));
             }}
           >
-            {{
-              all: "すべて",
-              unchecked: "未復習",
-              correct: "復習済み",
-              wrong: "苦手",
-            }[status]}
+            {statusLabels[status]}
           </button>
         ))}
       </div>
 
-      {/* 単語カード */}
-      <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {visibleWords.map(({ word, meaning, index }) => (
-          <li
-            key={index}
-            onClick={() => toggleFlip(index)}
-            className="cursor-pointer perspective"
-          >
-            <div
-              className="relative w-full h-48 preserve-3d transition-transform duration-500"
-              style={{
-                transform: flippedStates[index] ? "rotateY(180deg)" : "none",
-              }}
+      {loading ? (
+        <p>読み込み中...</p>
+      ) : (
+        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {visibleWords.map(({ word, meaning, index }) => (
+            <li
+              key={index}
+              onClick={() => toggleFlip(index)}
+              className="cursor-pointer perspective"
             >
-              {/* 表 */}
-              <div className="absolute w-full h-full backface-hidden bg-white border rounded-xl flex items-center justify-center text-lg font-bold shadow">
-                {word}
-              </div>
+              <div
+                className="relative w-full h-48 preserve-3d transition-transform duration-500"
+                style={{
+                  transform: flippedStates[index] ? "rotateY(180deg)" : "none",
+                }}
+              >
+                <div className="absolute w-full h-full backface-hidden bg-white border rounded-xl flex items-center justify-center text-lg font-bold shadow">
+                  {word}
+                </div>
 
-              {/* 裏 */}
-              <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-blue-600 text-white border rounded-xl relative flex items-center justify-center text-lg font-bold shadow p-4">
-                <div className="text-center">{meaning}</div>
-                <div className="absolute bottom-3 left-3 right-3 flex justify-between">
-                  <button
-                    className="bg-green-500 text-white text-sm px-3 py-1 rounded"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      updateStatus(index, "correct");
-                    }}
-                  >
-                    ◯
-                  </button>
-                  <button
-                    className="bg-red-500 text-white text-sm px-3 py-1 rounded"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      updateStatus(index, "wrong");
-                    }}
-                  >
-                    ✕
-                  </button>
+                <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-blue-600 text-white border rounded-xl relative flex items-center justify-center text-lg font-bold shadow p-4">
+                  <div className="text-center">
+                    {meaning || "意味が取得できませんでした"}
+                  </div>
+
+                  <div className="absolute bottom-3 left-3 right-3 flex justify-between">
+                    <button
+                      className="bg-green-500 text-white text-sm px-3 py-1 rounded"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        updateStatus(index, "correct");
+                      }}
+                    >
+                      ◯
+                    </button>
+                    <button
+                      className="bg-red-500 text-white text-sm px-3 py-1 rounded"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        updateStatus(index, "wrong");
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
 
-export default WordbookDetail;
+export default LearnPage;

@@ -87,3 +87,10 @@ export const authLoadingAtom = atom<boolean>(true);
 
 // 認証エラー状態のアトム
 export const authErrorAtom = atom<string | null>(null);
+
+export type SearchResult = {
+  word: string;
+  meaning: string;
+};
+
+export const searchResultAtom = atom<any[]>([]);
