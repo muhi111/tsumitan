@@ -1,5 +1,5 @@
 // App.tsx
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'; 
+import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'; 
 import Header from './components/Header';
 import Footer from './components/Footer';
 import AuthProvider from './components/AuthProvider';
@@ -49,11 +49,11 @@ const AppContent = () => {
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AuthProvider>
         <AppContent /> {/*  useLocationを使うためにコンポーネントを分離 */}
       </AuthProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
