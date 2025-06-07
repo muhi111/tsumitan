@@ -5,13 +5,15 @@ import React, { useState, useEffect } from 'react';
 
 // 
 
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 // addMockTask と updateMockTaskStatus を mockData からインポートするように修正
 import { fetchMockUserProfile, updateMockUserProfile, uploadMockAvatar, addMockTask, updateMockTaskStatus, deleteMockTask } from '../mockData';
-import { profileErrorAtom, profileLoadingAtom, userProfileAtom, type UserProfile } from '../atoms';
+import { profileErrorAtom, profileLoadingAtom, userProfileAtom, authUserAtom, type UserProfile } from '../atoms';
 
 
 const ProfilePage: React.FC = () => {
+  // Firebase認証ユーザー情報を取得
+  const authUser = useAtomValue(authUserAtom);
 
   // Jotaiのatomから状態とsetterを取得
   const [user, setUser] = useAtom(userProfileAtom);
@@ -233,6 +235,46 @@ const ProfilePage: React.FC = () => {
         </header>
 
         <main className="px-4 pt-2 pb-6 @container">
+          {/* Firebase認証情報セクション */}
+          {authUser && (
+            <section className="mb-6 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+              <h3 className="text-slate-900 text-lg font-bold leading-tight tracking-tight mb-3">アカウント情報</h3>
+              <div className="text-left space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-600">ユーザーID:</span>
+                  <span className="text-sm text-slate-900 font-mono">{authUser.uid.slice(0, 8)}...</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-600">メールアドレス:</span>
+                  <span className="text-sm text-slate-900">{authUser.email || '未設定'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-600">表示名:</span>
+                  <span className="text-sm text-slate-900">{authUser.displayName || '未設定'}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-600">アカウントタイプ:</span>
+                  <span className={`text-sm font-medium ${authUser.isAnonymous ? 'text-orange-600' : 'text-green-600'}`}>
+                    {authUser.isAnonymous ? '匿名ユーザー' : '登録ユーザー'}
+                  </span>
+                </div>
+              </div>
+              {authUser.isAnonymous && (
+                <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                  <p className="text-sm text-orange-800">
+                    匿名ユーザーとしてログインしています。アカウントを作成すると学習データを永続化できます。
+                  </p>
+                  <button
+                    onClick={() => window.location.href = '/auth'}
+                    className="mt-2 text-sm bg-orange-600 text-white px-3 py-1 rounded hover:bg-orange-700"
+                  >
+                    アカウントを作成
+                  </button>
+                </div>
+              )}
+            </section>
+          )}
+
           <section className="flex flex-col items-center text-center mb-8">
             <div className="relative mb-4">
               <div

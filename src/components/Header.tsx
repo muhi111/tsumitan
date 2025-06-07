@@ -1,12 +1,29 @@
-import { useAtom } from "jotai";
-import { search } from "../atoms";
+import { useAtom, useAtomValue } from "jotai";
+import { useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { search, authUserAtom } from "../atoms";
+import { auth } from "../firebase/config";
 
 const Header = () => {
-
-  const [searchValue,setSearchValue] = useAtom(search)
+  const [searchValue,setSearchValue] = useAtom(search);
+  const authUser = useAtomValue(authUserAtom);
+  const navigate = useNavigate();
 
   const handleClearSearch = () => {
     setSearchValue(''); //検索フォームのリセット
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      navigate('/home');
+    } catch (error) {
+      console.error('サインアウトエラー:', error);
+    }
+  };
+
+  const handleAuthAction = () => {
+    navigate('/auth');
   };
 
 //辞書で調べたら
@@ -17,10 +34,49 @@ const Header = () => {
           {/*<button className="text-slate-700 p-2 -ml-2">
             {/*<span className="material-icons">arrow_back_ios_new</span>
           </button>*/}
-          <div className="flex items-center pt-4 mb-4">
+          <div className="flex items-center justify-between pt-4 mb-4">
           <h1 className="text-slate-900 text-xl md:text-2xl font-bold flex-1 text-center mt-4">
             Dictionary
           </h1>
+          
+          {/* 認証状態表示とアクション */}
+          <div className="flex items-center space-x-2">
+            {authUser && !authUser.isAnonymous ? (
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2">
+                  {authUser.photoURL ? (
+                    <img 
+                      src={authUser.photoURL} 
+                      alt="プロフィール"
+                      className="w-8 h-8 rounded-full"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
+                      <span className="text-white text-sm font-medium">
+                        {authUser.displayName?.charAt(0) || authUser.email?.charAt(0) || 'U'}
+                      </span>
+                    </div>
+                  )}
+                  <span className="text-sm text-slate-700 hidden sm:block">
+                    {authUser.displayName || authUser.email}
+                  </span>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="text-sm text-slate-600 hover:text-slate-800 px-3 py-1 rounded-md hover:bg-slate-100"
+                >
+                  サインアウト
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleAuthAction}
+                className="text-sm bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              >
+                {authUser?.isAnonymous ? 'アカウント作成' : 'サインイン'}
+              </button>
+            )}
+          </div>
           </div>
 
         <div className="pb-4">
