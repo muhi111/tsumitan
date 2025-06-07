@@ -1,5 +1,5 @@
 //レスポンシブ 
-//PCいじょう　→サイドバーで画面遷移 縦並び びみょい?
+//PCいじょう　→サイドバーで画面遷移 縦並び 
 
 import { Link, useLocation } from "react-router-dom";
 
@@ -28,7 +28,7 @@ const Footer = () => {
         
         /* --- モバイル (デフォルト) のスタイル: フッター --- */
 
-        w-full sticky bottom-0 
+        w-full fixed bottom-0 
         bg-slate-50/80 backdrop-blur-sm 
         border-t border-slate-200
         
