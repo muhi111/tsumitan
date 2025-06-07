@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { search, authUserAtom, searchResultAtom } from "../atoms"; // searchResultAtom 追加
 import { auth } from "../firebase/config";
+import { apiPost } from "../utils/api";
 import type { FormEvent } from "react";
 
 type SearchRequest = {
@@ -36,24 +37,11 @@ const Header = () => {
     e.preventDefault();
     if (!searchValue.trim()) return;
 
-    const token = "1"; // 本来は authUser から取得してください
-    if (!token) {
-      alert("ログインが必要です");
-      return;
-    }
-
     const requestBody: SearchRequest = { word: searchValue };
     console.log("検索語:", requestBody.word);
 
     try {
-      const res = await fetch(`http://localhost:8080/api/search`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestBody),
-      });
+      const res = await apiPost("/api/search", requestBody);
 
       if (!res.ok) {
         const errorData = await res.json();

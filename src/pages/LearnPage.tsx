@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { apiGet, apiPatch } from "../utils/api";
 
 type Status = "all" | "unchecked" | "correct" | "wrong";
 
@@ -24,17 +25,9 @@ const LearnPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   // 意味取得API
-  const fetchMeaning = async (word: string, token: string): Promise<string> => {
+  const fetchMeaning = async (word: string): Promise<string> => {
     try {
-      const res = await fetch(
-        `http://localhost:8080/api/search?word=${encodeURIComponent(word)}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const res = await apiGet(`/api/search?word=${encodeURIComponent(word)}`);
       if (!res.ok) throw new Error("意味の取得に失敗");
       const data = await res.json();
       return data.meanings || "";
@@ -47,21 +40,10 @@ const LearnPage: React.FC = () => {
   // 単語＋意味の取得
   useEffect(() => {
     const fetchAllWords = async () => {
-      const token = "1"; // 仮トークン
       try {
         const [pendingRes, reviewedRes] = await Promise.all([
-          fetch("http://localhost:8080/api/review/pending", {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }),
-          fetch("http://localhost:8080/api/review/history", {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }),
+          apiGet("/api/review/pending"),
+          apiGet("/api/review/history"),
         ]);
 
         if (!pendingRes.ok || !reviewedRes.ok)
@@ -78,7 +60,7 @@ const LearnPage: React.FC = () => {
         const withMeanings = await Promise.all(
           allWords.map(async (w) => ({
             ...w,
-            meaning: await fetchMeaning(w.word, token),
+            meaning: await fetchMeaning(w.word),
           }))
         );
 
@@ -126,17 +108,8 @@ const LearnPage: React.FC = () => {
     );
 
     try {
-      const token = "1"; // 仮トークン
       const requestBody: ReviewRequest = { word: wordToUpdate.word };
-
-      const response = await fetch("http://localhost:8080/api/review", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(requestBody),
-      });
+      const response = await apiPatch("/api/review", requestBody);
 
       if (!response.ok) throw new Error("復習記録の送信に失敗しました");
     } catch (err) {
