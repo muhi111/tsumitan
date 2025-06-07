@@ -4,31 +4,32 @@ import { atom } from "jotai";
 
 
 //Profile.tsx 
-// ユーザーデータの型定義
-export interface UserProfile {
+// UserProfile型の定義を更新
+export type UserProfile = {
   id: string;
   name: string;
   email: string;
   avatarUrl: string;
-  joinedDate: string;
   stats: {
     wordsLearned: number;
     daysStudied: number;
     dayStreak: number;
   };
   weeklyGoal: {
+    description: string;
     targetWords: number;
     learnedWords: number;
-    description: string;
   };
-  todayTasks: Array<{
-    id: string;
-    title: string;
-    description: string;
-    status: 'In Progress' | 'Completed';
-  }>;
-}
+  todayTasks: Task[]; // Task型を配列として持つように変更
+};
 
+//todos 
+export type Task = {
+  id: string;
+  title: string;
+  description: string;
+  status: 'In Progress' | 'Completed';
+};
 
 // ユーザープロファイルデータのアトム
 export const userProfileAtom = atom<UserProfile | null>(null);

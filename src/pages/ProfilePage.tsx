@@ -1,39 +1,33 @@
-
-//Profile.tsx パスワード設定などはいったん除去コメントアウト中
-//パスワードーの別コンポーネントとの分離？
+// Profile.tsx パスワード設定などはいったん除去コメントアウト中
+// パスワードーの別コンポーネントとの分離？
 
 import React, { useState, useEffect } from 'react';
-import {
-  fetchMockUserProfile,
-  updateMockUserProfile,
-  // changeMockPassword, // コメントアウト
-  uploadMockAvatar,
-  
-} from '../mockData'; // mockData.tsのパスに合わせて調整
-import { profileErrorAtom, profileLoadingAtom, userProfileAtom,  type UserProfile } from '../atoms';
-import { useAtom } from 'jotai';
 
+// 
+
+import { useAtom } from 'jotai';
+// addMockTask と updateMockTaskStatus を mockData からインポートするように修正
+import { fetchMockUserProfile, updateMockUserProfile, uploadMockAvatar, addMockTask, updateMockTaskStatus, deleteMockTask } from '../mockData';
+import { profileErrorAtom, profileLoadingAtom, userProfileAtom, type UserProfile } from '../atoms';
 
 
 const ProfilePage: React.FC = () => {
 
-  
- // Jotaiのatomから状態とsetterを取得
+  // Jotaiのatomから状態とsetterを取得
   const [user, setUser] = useAtom(userProfileAtom);
   const [loading, setLoading] = useAtom(profileLoadingAtom);
   const [error, setError] = useAtom(profileErrorAtom);
 
-
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editFormData, setEditFormData] = useState({ name: '', email: '' });
- // const [passwordChangeFormData, setPasswordChangeFormData] = useState({
-   // currentPassword: '',
-    //newPassword: '',
-    //confirmNewPassword: '',
-  //});
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
 
-   // 初期データの読み込み
+  // todos
+  const [isAddingTask, setIsAddingTask] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState(''); 
+  const [newTaskDescription, setNewTaskDescription] = useState(''); 
+
+  // 初期データの読み込み
   useEffect(() => {
     const loadUserProfile = async () => {
       try {
@@ -146,18 +140,91 @@ const ProfilePage: React.FC = () => {
     );
   }
 
+  // タスク関連のイベントハンドラ
+  //タスク追加
+  const handleAddTask = async (e: React.FormEvent) => { // handleAddtask の t を大文字に修正
+    e.preventDefault();
+    if (!newTaskTitle.trim()) {
+      setError('タスクのタイトルは必須です');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null)
+      const newTask = {
+        id: String(Date.now()), //ユニークなID
+        title: newTaskTitle,
+        description: newTaskDescription,
+        status: 'In Progress' as 'In Progress' | 'Completed' //初期ステータス ('In progress' を 'In Progress' に修正)
+      };
+      const updatedUser = await addMockTask(user!, newTask); //userが存在することを保障
+      setUser(updatedUser);
+      setNewTaskTitle(''); 
+      setNewTaskDescription(''); 
+      setIsAddingTask(false); //フォームを閉じる
+      alert('新しいタスクが追加されました！'); // alertメッセージを修正
+    } catch (err) {
+      setError('タスクの追加に失敗しました。'); // エラーメッセージを修正
+      console.error('Error adding task:', err); // console.log を console.error に修正
+    } finally {
+      setLoading(false);
+    }
+  };
+  //タスク削除のイベントハンドル
+  const handleDeleteTask = async (taskId:string) => {
+    if(!user) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      const updatedUser = await deleteMockTask(user, taskId)// モック関数を呼び出す
+      setUser(updatedUser);
+      alert('タスクが削除されました');
+    }catch(err:any) {
+      setError(err.message || 'タスクの削除に失敗しました');
+      console.error('Error delete task', err);
+    }finally {
+      setLoading(false);
+    }
+  };
+
+  // タスクのステータスを切り替える関数
+  const handleToggleTaskStatus = async (taskId: string) => { // taskId の型を追加
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      const taskToUpdate = user.todayTasks.find(task => task.id === taskId);
+      // taskToUpdate が見つからなかった場合はエラーをスローするのではなく、処理を中断
+      if (!taskToUpdate) {
+        setError('タスクが見つかりません。'); // エラーメッセージをセット
+        setLoading(false); // ローディングを終了
+        return; // 処理を中断
+      }
+
+      const newStatus = taskToUpdate.status === 'In Progress' ? 'Completed' : 'In Progress';
+      const updatedUser = await updateMockTaskStatus(user, taskId, newStatus); // MockTaskStatus を updateMockTaskStatus に修正
+      setUser(updatedUser);
+      alert('タスクのステータスが更新されました。');
+    } catch (err: any) { // err の型を any にする (型エラー回避のため)
+      setError(err.message || 'タスクステータスの更新に失敗しました。'); // エラーメッセージをセット
+      console.error('Error updating task status:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // 週ごとの目標達成進捗バーの計算
   const weeklyProgressPercentage = user.weeklyGoal.targetWords > 0
     ? (user.weeklyGoal.learnedWords / user.weeklyGoal.targetWords) * 100
     : 0;
 
-
-
-
   return (
     // 横スクロール禁止の立並びで美しいUIふう
 
-    <div className="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden"> 
+    <div className="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
       <div className="flex-grow">
         <header className="sticky top-0 z-10 bg-gray-50/80 backdrop-blur-md">
           <div className="flex items-center p-4 pb-3">
@@ -210,7 +277,7 @@ const ProfilePage: React.FC = () => {
 
           {isEditingProfile && (
             <section className="mb-8 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
-              <h3 className="text-slate-900 text-xl  leading-tight tracking-tight font-Newsreader mb-4">プロフィール編集</h3>
+              <h3 className="text-slate-900 text-xl leading-tight tracking-tight font-Newsreader mb-4">プロフィール編集</h3>
               <form onSubmit={handleProfileUpdate}>
                 <div className="mb-4">
                   <label htmlFor="name" className="block text-gray-700 text-sm font-Newsreader mb-2">名前:</label>
@@ -224,18 +291,7 @@ const ProfilePage: React.FC = () => {
                     disabled={loading}
                   />
                 </div>
-                <div className="mb-4">
-                  <label htmlFor="email" className="block text-gray-700 text-sm font-Newsreader mb-2">メールアドレス:</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={editFormData.email}
-                    onChange={handleEditChange}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    disabled={loading}
-                  />
-                </div>
+                
                 <button
                   type="submit"
                   className="bg-green-500 hover:bg-green-600 text-white font- py-2 px-4 rounded"
@@ -247,7 +303,7 @@ const ProfilePage: React.FC = () => {
             </section>
           )}
 
-      
+
           <section className="grid grid-cols-3 gap-3 mb-8">
             <div className="flex flex-col gap-1 rounded-xl border border-slate-200 bg-white p-4 items-center text-center shadow-sm">
               <p className="text-slate-900 text-3xl font-bold leading-tight">{user.stats.wordsLearned}</p>
@@ -280,58 +336,8 @@ const ProfilePage: React.FC = () => {
             <p className="text-xs text-slate-500 mt-1.5 text-right">{user.weeklyGoal.learnedWords}/{user.weeklyGoal.targetWords} words ({weeklyProgressPercentage.toFixed(0)}%)</p>
           </section>
 
-          {/* パスワード変更セクション */}
-          
-           {/* <section className="mb-8 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
-            <h3 className="text-slate-900 text-xl font-bold leading-tight tracking-tight mb-4">パスワード変更</h3>
-            <form onSubmit={handlePasswordUpdate}>
-              <div className="mb-4">
-                <label htmlFor="currentPassword" className="block text-gray-700 text-sm font-bold mb-2">現在のパスワード:</label>
-                <input
-                  type="password"
-                  id="currentPassword"
-                  name="currentPassword"
-                  value={passwordChangeFormData.currentPassword}
-                  onChange={handlePasswordChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  disabled={loading}
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="newPassword" className="block text-gray-700 text-sm font-bold mb-2">新しいパスワード:</label>
-                <input
-                  type="password"
-                  id="newPassword"
-                  name="newPassword"
-                  value={passwordChangeFormData.newPassword}
-                  onChange={handlePasswordChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  disabled={loading}
-                />
-              </div>
-              <div className="mb-6">
-                <label htmlFor="confirmNewPassword" className="block text-gray-700 text-sm font-bold mb-2">新しいパスワード（確認用）:</label>
-                <input
-                  type="password"
-                  id="confirmNewPassword"
-                  name="confirmNewPassword"
-                  value={passwordChangeFormData.confirmNewPassword}
-                  onChange={handlePasswordChange}
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  disabled={loading}
-                />
-              </div>
-              <button
-                type="submit"
-                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
-                disabled={loading}
-              >
-                {loading ? '変更中...' : 'パスワードを変更'}
-              </button>
-            </form>
-          </section>
 
-           */}
+
           <section>
             <h3 className="text-slate-900 text-xl font-bold leading-tight tracking-tight px-1 pb-3 pt-2">Today's Tasks</h3>
             <div className="space-y-3">
@@ -345,22 +351,85 @@ const ProfilePage: React.FC = () => {
                     <span className={`text-sm font-medium ${task.status === 'In Progress' ? 'text-blue-500' : 'text-green-500'}`}>
                       {task.status === 'In Progress' ? 'In Progress' : 'Completed'}
                     </span>
-                    <button className="text-slate-500 hover:text-slate-700">
-                      <span className="material-icons">chevron_right</span>
+                    {/*タスクステータス変更ボタン */}
+                    <button
+                      onClick={() => handleToggleTaskStatus(task.id)} 
+                      className="text-slate-500 hover:text-slate-700">
+                      <span className="material-icons">
+
+                        {task.status === 'In Progress' ? 'check_circle_outline' : 'settings_backup_restore'}
+                      </span>
+                    </button>
+                    <button 
+                    onClick={()=> handleDeleteTask(task.id)}
+                    className="text-red-500 hover:text-red-700">
+                      <span className="material-icons">delete</span>
                     </button>
                   </div>
                 </div>
               ))}
-              <button className="w-full flex items-center justify-center gap-2 text-blue-500 font-medium py-3 px-4 rounded-xl border-2 border-dashed border-slate-300 hover:bg-slate-100 transition-colors">
+              {/* 新しいタスク追加ボタン */}
+              <button
+                onClick={() => setIsAddingTask(true)} // フォーム表示
+                className="w-full flex items-center justify-center gap-2 text-blue-500 font-medium py-3 px-4 rounded-xl border-2 border-dashed border-slate-300 hover:bg-slate-100 transition-colors"
+              >
                 <span className="material-icons">add_circle_outline</span>
                 Add New Task
               </button>
+
+              {/* 新しいタスク追加フォーム */}
+              {isAddingTask && (
+                <div className="mt-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+                  <h4 className="text-slate-900 text-lg font-bold mb-3">新しいタスクを追加</h4>
+                  <form onSubmit={handleAddTask}>
+                    <div className="mb-3">
+                      <label htmlFor="newTaskTitle" className="block text-gray-700 text-sm font-medium mb-1">タイトル:</label>
+                      <input
+                        type="text"
+                        id="newTaskTitle"
+                        value={newTaskTitle}
+                        onChange={(e) => setNewTaskTitle(e.target.value)}
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        placeholder="タスクのタイトル"
+                        disabled={loading}
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label htmlFor="newTaskDescription" className="block text-gray-700 text-sm font-medium mb-1">説明 (任意):</label>
+                      <textarea
+                        id="newTaskDescription"
+                        value={newTaskDescription}
+                        onChange={(e) => setNewTaskDescription(e.target.value)}
+                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                        placeholder="詳細な説明"
+                        rows={2}
+                        disabled={loading}
+                      ></textarea>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsAddingTask(false)}
+                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded"
+                        disabled={loading}
+                      >
+                        キャンセル
+                      </button>
+                      <button
+                        type="submit"
+                        className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded"
+                        disabled={loading}
+                      >
+                        タスクを追加
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
             </div>
           </section>
         </main>
       </div>
-
-
     </div>
   );
 };
