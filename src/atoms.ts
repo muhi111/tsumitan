@@ -62,7 +62,7 @@ const initialWordInfo : WordInfo = {
 
 //初期の単語hyou示用
 export const currentWordInfoAtom = atom<WordInfo>(initialWordInfo)
-
+export const searchErrorAtom = atom<string | null>(null); // ← エラー用の新しい Atom
 
 
 //学習用のメタデータなどLEarn.tsxを実装していく際に拡張していくyo
@@ -90,7 +90,7 @@ export const authErrorAtom = atom<string | null>(null);
 
 export type SearchResult = {
   word: string;
-  meaning: string;
+  meanings: string;
 };
 
 export const searchResultAtom = atom<SearchResult | null>(null);

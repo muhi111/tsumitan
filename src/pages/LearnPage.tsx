@@ -74,10 +74,9 @@ const LearnPage: React.FC = () => {
         );
         // 意味がある単語だけ残す
         const filtered = withMeanings
-        .filter((w) => w.meaning && w.meaning.trim() !== "")
-        .sort((a, b) => (b.search_count ?? 0) - (a.search_count ?? 0));
+          .filter((w) => w.meaning && w.meaning.trim() !== "")
+          .sort((a, b) => (b.search_count ?? 0) - (a.search_count ?? 0));
         console.log("✅ filtered（意味あり & search_count降順）", filtered);
-
 
         setWords(filtered);
         setFlippedStates(new Array(filtered.length).fill(false));
@@ -192,31 +191,40 @@ const LearnPage: React.FC = () => {
                 <div className="absolute w-full h-full backface-hidden bg-white border rounded-xl flex items-center justify-center text-lg font-bold shadow">
                   {word}
                 </div>
-
-                <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-blue-600 text-white border rounded-xl relative flex items-center justify-center text-lg font-bold shadow p-4">
-                  <div className="text-center">
-                    {meaning || "意味が取得できませんでした"}
+                <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-blue-600 text-white border rounded-xl relative flex flex-col p-4 shadow">
+                  {/* 意味エリア */}
+                  <div className="flex-1 overflow-y-auto mb-3 pr-2">
+                    <div className="text-center whitespace-pre-line">
+                      {meaning || "意味が取得できませんでした"}
+                    </div>
                   </div>
 
-                  <div className="absolute bottom-3 left-3 right-3 flex justify-between">
-                    <button
-                      className="bg-green-500 text-white text-sm px-3 py-1 rounded"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        updateStatus(index, "correct");
-                      }}
-                    >
-                      ◯
-                    </button>
-                    <button
-                      className="bg-red-500 text-white text-sm px-3 py-1 rounded"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        updateStatus(index, "wrong");
-                      }}
-                    >
-                      ✕
-                    </button>
+                  {/* ボタン + 検索回数 */}
+                  <div className="flex justify-between items-center flex-shrink-0">
+                    <div className="flex space-x-2">
+                      <button
+                        className="bg-green-500 text-white text-sm px-3 py-1 rounded"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateStatus(index, "correct");
+                        }}
+                      >
+                        ◯
+                      </button>
+                      <button
+                        className="bg-red-500 text-white text-sm px-3 py-1 rounded"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updateStatus(index, "wrong");
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <div className="text-sm text-white opacity-100">
+                      🔍 {words[index].search_count}
+                    </div>
                   </div>
                 </div>
               </div>

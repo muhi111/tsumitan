@@ -41,44 +41,46 @@ const Header = () => {
     const requestBody: SearchRequest = { word: searchValue };
     console.log("検索語:", requestBody.word);
     try {
-  const res = await apiPost("/api/search", requestBody);
+      const res = await apiPost("/api/search", requestBody);
 
-  if (res.status === 200) {
-    // POST成功 → GETで意味取得
-    const getRes = await apiGet(`/api/search?word=${encodeURIComponent(requestBody.word)}`);
-    if (!getRes.ok) {
-      if (getRes.status === 404) {
-        alert("単語が見つかりませんでした");
-        return;
+      if (res.status === 200) {
+        // POST成功 → GETで意味取得
+        const getRes = await apiGet(
+          `/api/search?word=${encodeURIComponent(requestBody.word)}`
+        );
+        if (!getRes.ok) {
+          if (getRes.status === 404) {
+            setSearchResult(null);
+            alert("単語が見つかりませんでした");
+            return;
+          }
+          throw new Error("意味の取得に失敗");
+        }
+        if (getRes.status == 200) {
+          const data = await getRes.json();
+          console.log("🔍 検索結果データ:", data);
+          setSearchResult(data);
+          navigate("/"); // 必要ならリダイレクト
+        }
+      } else {
+        const errorData = await res.json();
+        console.error("検索POST失敗:", errorData);
+
+        if (res.status === 404) {
+          setSearchResult(null);
+          alert("単語が見つかりませんでした");
+        } else {
+          alert("検索に失敗しました");
+        }
       }
-      throw new Error("意味の取得に失敗");
+    } catch (err: unknown) {
+      console.error("検索中にエラー:", err);
+      if (err instanceof Error) {
+        alert(`検索中にエラーが発生しました: ${err.message}`);
+      } else {
+        alert("予期しないエラーが発生しました");
+      }
     }
-
-    const data = await getRes.json();
-    console.log("🔍 検索結果データ:", data);
-    setSearchResult(data);
-    navigate("/"); // 必要ならリダイレクト
-  } else {
-    const errorData = await res.json();
-    console.error("検索POST失敗:", errorData);
-
-    if (res.status === 404) {
-      alert("単語が見つかりませんでした");
-    } else {
-      alert("検索に失敗しました");
-    }
-  }
-} catch (err: unknown) {
-  console.error("検索中にエラー:", err);
-  if (err instanceof Error) {
-    alert(`検索中にエラーが発生しました: ${err.message}`);
-  } else {
-    alert("予期しないエラーが発生しました");
-  }
-}
-
-
-   
   };
 
   return (
