@@ -193,12 +193,16 @@ const LearnPage: React.FC = () => {
                   {word}
                 </div>
 
-                <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-blue-600 text-white border rounded-xl relative flex items-center justify-center text-lg font-bold shadow p-4">
-                  <div className="text-center">
-                    {meaning || "意味が取得できませんでした"}
+                <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-blue-600 text-white border rounded-xl relative flex items-center justify-center text-lg font-bold shadow p-4 flex-col">
+                  {/* スクロール可能な意味表示エリア */}
+                  <div className="flex-1 overflow-y-auto mb-3 pr-2">
+                    <div className="text-center">
+                      {meaning || "意味が取得できませんでした"}
+                    </div>
                   </div>
 
-                  <div className="absolute bottom-3 left-3 right-3 flex justify-between">
+                  {/* 固定位置のボタンエリア */}
+                  <div className="flex justify-between flex-shrink-0">
                     <button
                       className="bg-green-500 text-white text-sm px-3 py-1 rounded"
                       onClick={(e) => {
