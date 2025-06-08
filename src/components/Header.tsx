@@ -4,7 +4,7 @@ import { signOut } from "firebase/auth";
 import { search, authUserAtom, searchResultAtom } from "../atoms"; // searchResultAtom 追加
 import { auth } from "../firebase/config";
 import { apiPost } from "../utils/api";
-import { apiGet, apiPatch } from "../utils/api";
+import { apiGet } from "../utils/api";
 import type { FormEvent } from "react";
 
 type SearchRequest = {
