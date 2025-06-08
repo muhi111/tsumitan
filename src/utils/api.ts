@@ -33,7 +33,7 @@ interface ApiRequestOptions {
 /**
  * Make an authenticated API request
  */
-export const apiRequest = async (
+const apiRequest = async (
   endpoint: string,
   options: ApiRequestOptions = {}
 ): Promise<Response> => {
@@ -95,13 +95,13 @@ export const apiPatch = async (endpoint: string, body?: any): Promise<Response> 
 /**
  * Convenience method for PUT requests
  */
-export const apiPut = async (endpoint: string, body?: any): Promise<Response> => {
+const apiPut = async (endpoint: string, body?: any): Promise<Response> => {
   return apiRequest(endpoint, { method: 'PUT', body });
 };
 
 /**
  * Convenience method for DELETE requests
  */
-export const apiDelete = async (endpoint: string): Promise<Response> => {
+const apiDelete = async (endpoint: string): Promise<Response> => {
   return apiRequest(endpoint, { method: 'DELETE' });
 };
