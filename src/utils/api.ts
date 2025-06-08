@@ -95,13 +95,13 @@ export const apiPatch = async (endpoint: string, body?: any): Promise<Response> 
 /**
  * Convenience method for PUT requests
  */
-const apiPut = async (endpoint: string, body?: any): Promise<Response> => {
-  return apiRequest(endpoint, { method: 'PUT', body });
-};
+// const apiPut = async (endpoint: string, body?: any): Promise<Response> => {
+//   return apiRequest(endpoint, { method: 'PUT', body });
+// };
 
 /**
  * Convenience method for DELETE requests
  */
-const apiDelete = async (endpoint: string): Promise<Response> => {
-  return apiRequest(endpoint, { method: 'DELETE' });
-};
+// const apiDelete = async (endpoint: string): Promise<Response> => {
+//   return apiRequest(endpoint, { method: 'DELETE' });
+// };
