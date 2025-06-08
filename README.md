@@ -1,54 +1,129 @@
-# React + TypeScript + Vite
+# 積み単 (tsumitan)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+スマートフォン最適化された英単語学習アプリケーション
 
-Currently, two official plugins are available:
+## 概要
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+積み単は効率的な英単語学習を支援するWebアプリケーションです。単語を検索すると自動的に単語帳に追加され、検索回数や復習回数を記録することで、ユーザーに最適化された学習体験を提供します。
 
-## Expanding the ESLint configuration
+## 主な機能
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- 🔍 **単語検索と自動単語帳追加** - 検索した単語が自動的に個人の単語帳に保存
+- 📊 **学習データ記録** - 検索回数や復習回数を追跡し学習効率を向上
+- 🎯 **最適化された単語帳** - 学習データに基づいて最適な復習単語を提示
+- 👤 **匿名認証** - Firebase匿名認証によりログイン不要で利用可能
+- 📱 **スマートフォン最適化** - スマートフォンでの使用を想定したUI設計
+- 🔧 **PWA対応** - ホーム画面への追加やオフライン機能をサポート
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## 技術スタック
+
+### フロントエンド
+- **React** - UIライブラリ
+- **TypeScript** - 型安全な開発
+- **Vite** - 高速ビルドツール
+- **React Router DOM** - SPA ルーティング
+- **Jotai** - 状態管理
+- **Tailwind CSS** - スタイリング
+
+### バックエンド・認証
+- **Firebase** - 認証・匿名ログイン
+- **REST API** - バックエンドサーバーとの連携
+
+### デプロイ
+- **GitHub Pages** - フロントエンドホスティング
+
+## 関連リポジトリ・デプロイ先
+
+- **デプロイ先**: [tsumitan.me](https://tsumitan.me)
+- **バックエンドリポジトリ**: https://github.com/geek-hackathon-vol6-team20/tsumitan-backend
+
+## セットアップ
+
+### 前提条件
+- Node.js 18.0.0 以上
+- npm または yarn
+
+### インストール
+
+```bash
+# リポジトリをクローン
+git clone https://github.com/yourusername/tsumitan-frontend.git
+cd tsumitan-frontend
+
+# 依存関係をインストール
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 環境変数設定
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+`.env.example` を参考に `.env` ファイルを作成し、必要な環境変数を設定してください。
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+cp .env.example .env
 ```
+
+必要な環境変数:
+- `VITE_FIREBASE_API_KEY` - Firebase API キー
+- `VITE_FIREBASE_AUTH_DOMAIN` - Firebase 認証ドメイン
+- `VITE_FIREBASE_PROJECT_ID` - Firebase プロジェクト ID
+- `VITE_FIREBASE_STORAGE_BUCKET` - Firebase ストレージバケット
+- `VITE_FIREBASE_MESSAGING_SENDER_ID` - Firebase メッセージング送信者 ID
+- `VITE_FIREBASE_APP_ID` - Firebase アプリ ID
+- `VITE_API_BASE_URL` - バックエンド API のベース URL
+
+### 開発サーバー起動
+
+```bash
+npm run dev
+```
+
+開発サーバーが `http://localhost:5173` で起動します。
+
+## プロジェクト構造
+
+```
+src/
+├── components/     # 再利用可能なUIコンポーネント
+├── pages/          # ページコンポーネント
+├── firebase/       # Firebase設定
+├── utils/          # ユーティリティ
+├── types/          # TypeScript型定義
+├── atoms.ts        # Jotai状態管理
+├── App.tsx         # アプリケーションルート
+└── main.tsx        # エントリーポイント
+```
+
+## ビルド・デプロイ
+
+### プロダクションビルド
+
+```bash
+npm run build
+```
+
+### GitHub Pages デプロイ
+
+このプロジェクトは GitHub Actions を使用して自動的に GitHub Pages にデプロイされます。
+
+`.github/workflows/deploy.yml` が設定済みで、メインブランチへの push 時に自動デプロイが実行されます。
+
+## 開発
+
+### 利用可能なスクリプト
+
+```bash
+npm run dev      # 開発サーバー起動
+npm run build    # プロダクションビルド
+npm run preview  # プロダクションビルドのプレビュー
+npm run lint     # ESLint実行
+```
+
+### API連携
+
+バックエンドAPIとの通信は `src/utils/api.ts` で管理されています。Firebase認証トークンを自動的に付与してAPIリクエストを送信します。
+
+主要なAPIエンドポイント:
+- `GET /api/review/pending` - 未復習単語の取得
+- `GET /api/review/history` - 復習済み単語の取得
+- `GET /api/search?word=<単語>` - 単語の意味検索
+- `PATCH /api/review` - 復習記録の更新
