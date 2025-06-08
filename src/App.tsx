@@ -7,7 +7,6 @@ import AuthGuard from './components/AuthGuard';
 // --- pages ディレクトリから各画面コンポーネントをインポート ---
 import HomePage from './pages/HomePage';
 import LearnPage from './pages/LearnPage';
-import DictionaryPage from './pages/DictionaryPage'; // MainComponentsから変更
 import ProfilePage from './pages/ProfilePage';
 import AuthPage from './pages/AuthPage';
 
@@ -29,7 +28,6 @@ const AppContent = () => {
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/home" element={<HomePage />} />
               <Route path="/learn" element={<LearnPage />} />
-              <Route path="/dictionary" element={<DictionaryPage />} /> {/* DictionaryPageを使用 */}
               <Route 
                 path="/profile" 
                 element={

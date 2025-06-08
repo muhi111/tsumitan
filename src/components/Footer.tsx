@@ -14,7 +14,6 @@ type NavItem = {
 const navItems: NavItem[] = [    
   { icon: 'home', label: 'Home', path: '/home' },
   { icon: 'school', label: 'Learn' ,path: '/learn' },
-  { icon: 'import_contacts', label: 'Dictionary', path: '/dictionary'},
   { icon: 'person_outline', label: 'Profile', path: '/profile' },
 ];
 
