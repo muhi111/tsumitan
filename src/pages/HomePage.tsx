@@ -21,7 +21,7 @@ const HomePage = () => {
             {searchResult.word}
           </h2>
           <ul className="list-disc pl-6 space-y-2 text-slate-800 leading-relaxed">
-            {searchResult.meaning
+            {searchResult.meanings
               .split(" / ")
               .map((meaning: string, index: number) => (
                 <li key={index}>{meaning}</li>
