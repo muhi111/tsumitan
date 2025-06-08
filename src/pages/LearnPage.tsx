@@ -23,6 +23,14 @@ const LearnPage: React.FC = () => {
   const [showStatus, setShowStatus] = useState<Status>("all");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const cleanMeaning = (text: string): string => {
+    return text
+      .replace(/\([^)]*\)/g, "") // 半角かっこ (…)
+      .replace(/《.*?》/g, "") // 山かっこ《…》
+      .replace(/〈.*?〉/g, "") // 山かっこ《…》
+      .replace(/\s+/g, " ") // 余分な空白を1つに
+      .trim();
+  };
 
   // 意味取得API
   const fetchMeaning = async (word: string): Promise<string> => {
@@ -30,7 +38,8 @@ const LearnPage: React.FC = () => {
       const res = await apiGet(`/api/search?word=${encodeURIComponent(word)}`);
       if (!res.ok) throw new Error("意味の取得に失敗");
       const data = await res.json();
-      return data.meanings || "";
+      const rawMeaning = data.meanings || "";
+      return cleanMeaning(rawMeaning); // ← ここで前処理を適用！
     } catch (err) {
       console.error(`意味取得失敗 (${word}):`, err);
       return "";
@@ -63,9 +72,15 @@ const LearnPage: React.FC = () => {
             meaning: await fetchMeaning(w.word),
           }))
         );
+        // 意味がある単語だけ残す
+        const filtered = withMeanings
+        .filter((w) => w.meaning && w.meaning.trim() !== "")
+        .sort((a, b) => (b.search_count ?? 0) - (a.search_count ?? 0));
+        console.log("✅ filtered（意味あり & search_count降順）", filtered);
 
-        setWords(withMeanings);
-        setFlippedStates(new Array(withMeanings.length).fill(false));
+
+        setWords(filtered);
+        setFlippedStates(new Array(filtered.length).fill(false));
       } catch (err) {
         console.error("単語取得エラー:", err);
       } finally {

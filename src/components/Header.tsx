@@ -4,6 +4,7 @@ import { signOut } from "firebase/auth";
 import { search, authUserAtom, searchResultAtom } from "../atoms"; // searchResultAtom 追加
 import { auth } from "../firebase/config";
 import { apiPost } from "../utils/api";
+import { apiGet, apiPatch } from "../utils/api";
 import type { FormEvent } from "react";
 
 type SearchRequest = {
@@ -39,28 +40,45 @@ const Header = () => {
 
     const requestBody: SearchRequest = { word: searchValue };
     console.log("検索語:", requestBody.word);
-
     try {
-      const res = await apiPost("/api/search", requestBody);
+  const res = await apiPost("/api/search", requestBody);
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error("検索失敗:", errorData);
-        throw new Error("検索失敗");
+  if (res.status === 200) {
+    // POST成功 → GETで意味取得
+    const getRes = await apiGet(`/api/search?word=${encodeURIComponent(requestBody.word)}`);
+    if (!getRes.ok) {
+      if (getRes.status === 404) {
+        alert("単語が見つかりませんでした");
+        return;
       }
-
-      const data = await res.json(); // ← APIの検索結果を受け取る
-      console.log("✅ 検索結果データ:", data);
-      setSearchResult(data); // Atomにセットして共有
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.error("検索エラー:", err.message);
-        console.error("スタックトレース:", err.stack);
-      } else {
-        console.error("未知のエラー:", err);
-      }
-      alert("検索中にエラーが発生しました");
+      throw new Error("意味の取得に失敗");
     }
+
+    const data = await getRes.json();
+    console.log("🔍 検索結果データ:", data);
+    setSearchResult(data);
+    navigate("/"); // 必要ならリダイレクト
+  } else {
+    const errorData = await res.json();
+    console.error("検索POST失敗:", errorData);
+
+    if (res.status === 404) {
+      alert("単語が見つかりませんでした");
+    } else {
+      alert("検索に失敗しました");
+    }
+  }
+} catch (err: unknown) {
+  console.error("検索中にエラー:", err);
+  if (err instanceof Error) {
+    alert(`検索中にエラーが発生しました: ${err.message}`);
+  } else {
+    alert("予期しないエラーが発生しました");
+  }
+}
+
+
+   
   };
 
   return (

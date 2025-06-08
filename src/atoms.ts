@@ -93,4 +93,4 @@ export type SearchResult = {
   meaning: string;
 };
 
-export const searchResultAtom = atom<any[]>([]);
+export const searchResultAtom = atom<SearchResult | null>(null);
