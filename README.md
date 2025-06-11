@@ -24,6 +24,7 @@
 - **React Router DOM** - SPA ルーティング
 - **Jotai** - 状態管理
 - **Tailwind CSS** - スタイリング
+- **Biome** - コードフォーマッター・リンター
 
 ### バックエンド・認証
 - **Firebase** - 認証・匿名ログイン
@@ -115,5 +116,5 @@ npm run build
 npm run dev      # 開発サーバー起動
 npm run build    # プロダクションビルド
 npm run preview  # プロダクションビルドのプレビュー
-npm run lint     # ESLint実行
+npm run check    # Biomeのコードチェック
 ```
