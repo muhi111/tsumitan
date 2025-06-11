@@ -187,6 +187,22 @@ const LearnPage: React.FC = () => {
           <div className="flex items-center justify-center h-full">
             <p className="text-gray-500">読み込み中...</p>
           </div>
+        ) : visibleWords.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center px-4">
+              <p className="text-gray-500 text-lg mb-2">📚</p>
+              <p className="text-gray-600 font-medium mb-1">
+                {showStatus === 'all' 
+                  ? '復習する単語がありません'
+                  : `${statusLabels[showStatus]}の単語がありません`}
+              </p>
+              <p className="text-gray-500 text-sm">
+                {showStatus !== 'all' 
+                  ? '他のカテゴリを確認してみてください'
+                  : '新しい単語を検索して学習を始めましょう'}
+              </p>
+            </div>
+          </div>
         ) : (
           <CardStack
             words={visibleWords}
