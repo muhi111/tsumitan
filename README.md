@@ -117,13 +117,3 @@ npm run build    # プロダクションビルド
 npm run preview  # プロダクションビルドのプレビュー
 npm run lint     # ESLint実行
 ```
-
-### API連携
-
-バックエンドAPIとの通信は `src/utils/api.ts` で管理されています。Firebase認証トークンを自動的に付与してAPIリクエストを送信します。
-
-主要なAPIエンドポイント:
-- `GET /api/review/pending` - 未復習単語の取得
-- `GET /api/review/history` - 復習済み単語の取得
-- `GET /api/search?word=<単語>` - 単語の意味検索
-- `PATCH /api/review` - 復習記録の更新
