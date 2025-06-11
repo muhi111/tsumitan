@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { apiGet, apiPatch } from "../utils/api";
+import type React from 'react';
+import { useEffect, useState } from 'react';
+import { apiGet, apiPatch } from '../utils/api';
 
-type Status = "all" | "unchecked" | "correct" | "wrong";
+type Status = 'all' | 'unchecked' | 'correct' | 'wrong';
 
 type Word = {
   word: string;
@@ -20,15 +21,15 @@ interface ReviewRequest {
 const LearnPage: React.FC = () => {
   const [words, setWords] = useState<WordWithStatus[]>([]);
   const [flippedStates, setFlippedStates] = useState<boolean[]>([]);
-  const [showStatus, setShowStatus] = useState<Status>("all");
+  const [showStatus, setShowStatus] = useState<Status>('all');
   const [feedback, setFeedback] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const cleanMeaning = (text: string): string => {
     return text
-      .replace(/\([^)]*\)/g, "") // 半角かっこ (…)
-      .replace(/《.*?》/g, "") // 山かっこ《…》
-      .replace(/〈.*?〉/g, "") // 山かっこ《…》
-      .replace(/\s+/g, " ") // 余分な空白を1つに
+      .replace(/\([^)]*\)/g, '') // 半角かっこ (…)
+      .replace(/《.*?》/g, '') // 山かっこ《…》
+      .replace(/〈.*?〉/g, '') // 山かっこ《…》
+      .replace(/\s+/g, ' ') // 余分な空白を1つに
       .trim();
   };
 
@@ -36,13 +37,13 @@ const LearnPage: React.FC = () => {
   const fetchMeaning = async (word: string): Promise<string> => {
     try {
       const res = await apiGet(`/api/search?word=${encodeURIComponent(word)}`);
-      if (!res.ok) throw new Error("意味の取得に失敗");
+      if (!res.ok) throw new Error('意味の取得に失敗');
       const data = await res.json();
-      const rawMeaning = data.meanings || "";
+      const rawMeaning = data.meanings || '';
       return cleanMeaning(rawMeaning); // ← ここで前処理を適用！
     } catch (err) {
       console.error(`意味取得失敗 (${word}):`, err);
-      return "";
+      return '';
     }
   };
 
@@ -51,37 +52,37 @@ const LearnPage: React.FC = () => {
     const fetchAllWords = async () => {
       try {
         const [pendingRes, reviewedRes] = await Promise.all([
-          apiGet("/api/review/pending"),
-          apiGet("/api/review/history"),
+          apiGet('/api/review/pending'),
+          apiGet('/api/review/history')
         ]);
 
         if (!pendingRes.ok || !reviewedRes.ok)
-          throw new Error("単語取得に失敗しました");
+          throw new Error('単語取得に失敗しました');
 
         const pendingWords: Word[] = await pendingRes.json();
         const reviewedWords: Word[] = await reviewedRes.json();
 
         const allWords = [
-          ...pendingWords.map((w) => ({ ...w, status: "unchecked" as const })),
-          ...reviewedWords.map((w) => ({ ...w, status: "correct" as const })),
+          ...pendingWords.map((w) => ({ ...w, status: 'unchecked' as const })),
+          ...reviewedWords.map((w) => ({ ...w, status: 'correct' as const }))
         ];
 
         const withMeanings = await Promise.all(
           allWords.map(async (w) => ({
             ...w,
-            meaning: await fetchMeaning(w.word),
+            meaning: await fetchMeaning(w.word)
           }))
         );
         // 意味がある単語だけ残す
         const filtered = withMeanings
-          .filter((w) => w.meaning && w.meaning.trim() !== "")
+          .filter((w) => w.meaning && w.meaning.trim() !== '')
           .sort((a, b) => (b.search_count ?? 0) - (a.search_count ?? 0));
-        console.log("✅ filtered（意味あり & search_count降順）", filtered);
+        console.log('✅ filtered（意味あり & search_count降順）', filtered);
 
         setWords(filtered);
         setFlippedStates(new Array(filtered.length).fill(false));
       } catch (err) {
-        console.error("単語取得エラー:", err);
+        console.error('単語取得エラー:', err);
       } finally {
         setLoading(false);
       }
@@ -93,7 +94,7 @@ const LearnPage: React.FC = () => {
   const visibleWords = words
     .map((word, index) => ({ ...word, index }))
     .filter(({ status }) =>
-      showStatus === "all" ? true : status === showStatus
+      showStatus === 'all' ? true : status === showStatus
     );
 
   const toggleFlip = (index: number) => {
@@ -106,7 +107,7 @@ const LearnPage: React.FC = () => {
 
   const updateStatus = async (
     index: number,
-    newStatus: "correct" | "wrong"
+    newStatus: 'correct' | 'wrong'
   ) => {
     const wordToUpdate = words[index];
     setWords((prev) => {
@@ -116,18 +117,18 @@ const LearnPage: React.FC = () => {
     });
 
     setFeedback(
-      newStatus === "correct"
-        ? "✅ よくできました！この調子✨"
-        : "❌ 間違えても大丈夫！次に活かそう💪"
+      newStatus === 'correct'
+        ? '✅ よくできました！この調子✨'
+        : '❌ 間違えても大丈夫！次に活かそう💪'
     );
 
     try {
       const requestBody: ReviewRequest = { word: wordToUpdate.word };
-      const response = await apiPatch("/api/review", requestBody);
+      const response = await apiPatch('/api/review', requestBody);
 
-      if (!response.ok) throw new Error("復習記録の送信に失敗しました");
+      if (!response.ok) throw new Error('復習記録の送信に失敗しました');
     } catch (err) {
-      console.error("復習記録送信エラー:", err);
+      console.error('復習記録送信エラー:', err);
     }
   };
 
@@ -139,10 +140,10 @@ const LearnPage: React.FC = () => {
   }, [feedback]);
 
   const statusLabels: Record<Status, string> = {
-    all: "すべて",
-    unchecked: "未復習",
-    correct: "復習済み",
-    wrong: "苦手",
+    all: 'すべて',
+    unchecked: '未復習',
+    correct: '復習済み',
+    wrong: '苦手'
   };
 
   return (
@@ -160,7 +161,7 @@ const LearnPage: React.FC = () => {
           <button
             key={status}
             className={`px-4 py-2 rounded ${
-              showStatus === status ? "bg-blue-600 text-white" : "bg-gray-200"
+              showStatus === status ? 'bg-blue-600 text-white' : 'bg-gray-200'
             }`}
             onClick={() => {
               setShowStatus(status);
@@ -185,7 +186,7 @@ const LearnPage: React.FC = () => {
               <div
                 className="relative w-full h-48 preserve-3d transition-transform duration-500"
                 style={{
-                  transform: flippedStates[index] ? "rotateY(180deg)" : "none",
+                  transform: flippedStates[index] ? 'rotateY(180deg)' : 'none'
                 }}
               >
                 <div className="absolute w-full h-full backface-hidden bg-white border rounded-xl flex items-center justify-center text-lg font-bold shadow">
@@ -195,7 +196,7 @@ const LearnPage: React.FC = () => {
                   {/* 意味エリア */}
                   <div className="flex-1 overflow-y-auto mb-3 pr-2">
                     <div className="text-center whitespace-pre-line">
-                      {meaning || "意味が取得できませんでした"}
+                      {meaning || '意味が取得できませんでした'}
                     </div>
                   </div>
 
@@ -206,7 +207,7 @@ const LearnPage: React.FC = () => {
                         className="bg-green-500 text-white text-sm px-3 py-1 rounded"
                         onClick={(e) => {
                           e.stopPropagation();
-                          updateStatus(index, "correct");
+                          updateStatus(index, 'correct');
                         }}
                       >
                         ◯
@@ -215,7 +216,7 @@ const LearnPage: React.FC = () => {
                         className="bg-red-500 text-white text-sm px-3 py-1 rounded"
                         onClick={(e) => {
                           e.stopPropagation();
-                          updateStatus(index, "wrong");
+                          updateStatus(index, 'wrong');
                         }}
                       >
                         ✕

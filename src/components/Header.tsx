@@ -1,11 +1,11 @@
-import { useAtom, useAtomValue, useSetAtom } from "jotai"; // useSetAtom 追加
-import { useNavigate } from "react-router-dom";
-import { signOut } from "firebase/auth";
-import { search, authUserAtom, searchResultAtom } from "../atoms"; // searchResultAtom 追加
-import { auth } from "../firebase/config";
-import { apiPost } from "../utils/api";
-import { apiGet } from "../utils/api";
-import type { FormEvent } from "react";
+import { signOut } from 'firebase/auth';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'; // useSetAtom 追加
+import type { FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { authUserAtom, search, searchResultAtom } from '../atoms'; // searchResultAtom 追加
+import { auth } from '../firebase/config';
+import { apiPost } from '../utils/api';
+import { apiGet } from '../utils/api';
 
 type SearchRequest = {
   word: string;
@@ -18,20 +18,20 @@ const Header = () => {
   const navigate = useNavigate();
 
   const handleClearSearch = () => {
-    setSearchValue("");
+    setSearchValue('');
   };
 
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      navigate("/home");
+      navigate('/home');
     } catch (error) {
-      console.error("サインアウトエラー:", error);
+      console.error('サインアウトエラー:', error);
     }
   };
 
   const handleAuthAction = () => {
-    navigate("/auth");
+    navigate('/auth');
   };
 
   const handleSearch = async (e: FormEvent) => {
@@ -39,9 +39,9 @@ const Header = () => {
     if (!searchValue.trim()) return;
 
     const requestBody: SearchRequest = { word: searchValue };
-    console.log("検索語:", requestBody.word);
+    console.log('検索語:', requestBody.word);
     try {
-      const res = await apiPost("/api/search", requestBody);
+      const res = await apiPost('/api/search', requestBody);
 
       if (res.status === 200) {
         // POST成功 → GETで意味取得
@@ -51,34 +51,34 @@ const Header = () => {
         if (!getRes.ok) {
           if (getRes.status === 404) {
             setSearchResult(null);
-            alert("単語が見つかりませんでした");
+            alert('単語が見つかりませんでした');
             return;
           }
-          throw new Error("意味の取得に失敗");
+          throw new Error('意味の取得に失敗');
         }
         if (getRes.status == 200) {
           const data = await getRes.json();
-          console.log("🔍 検索結果データ:", data);
+          console.log('🔍 検索結果データ:', data);
           setSearchResult(data);
-          navigate("/"); // 必要ならリダイレクト
+          navigate('/'); // 必要ならリダイレクト
         }
       } else {
         const errorData = await res.json();
-        console.error("検索POST失敗:", errorData);
+        console.error('検索POST失敗:', errorData);
 
         if (res.status === 404) {
           setSearchResult(null);
-          alert("単語が見つかりませんでした");
+          alert('単語が見つかりませんでした');
         } else {
-          alert("検索に失敗しました");
+          alert('検索に失敗しました');
         }
       }
     } catch (err: unknown) {
-      console.error("検索中にエラー:", err);
+      console.error('検索中にエラー:', err);
       if (err instanceof Error) {
         alert(`検索中にエラーが発生しました: ${err.message}`);
       } else {
-        alert("予期しないエラーが発生しました");
+        alert('予期しないエラーが発生しました');
       }
     }
   };
@@ -104,7 +104,7 @@ const Header = () => {
                     <span className="text-white text-sm font-medium">
                       {authUser.displayName?.charAt(0) ||
                         authUser.email?.charAt(0) ||
-                        "U"}
+                        'U'}
                     </span>
                   </div>
                 )}
@@ -123,7 +123,7 @@ const Header = () => {
                 onClick={handleAuthAction}
                 className="text-sm bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
               >
-                {authUser?.isAnonymous ? "アカウント作成" : "サインイン"}
+                {authUser?.isAnonymous ? 'アカウント作成' : 'サインイン'}
               </button>
             )}
           </div>

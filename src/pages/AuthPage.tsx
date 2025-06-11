@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAtomValue } from 'jotai';
-import SignUpForm from '../components/SignUpForm';
-import SignInForm from '../components/SignInForm';
+import type React from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authUserAtom } from '../atoms';
+import SignInForm from '../components/SignInForm';
+import SignUpForm from '../components/SignUpForm';
 
 const AuthPage: React.FC = () => {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
@@ -82,9 +83,7 @@ const AuthPage: React.FC = () => {
 
         {/* フッター情報 */}
         <div className="text-center text-sm text-gray-600">
-          <p>
-            安全で快適な学習環境を提供するため、適切にご利用ください。
-          </p>
+          <p>安全で快適な学習環境を提供するため、適切にご利用ください。</p>
         </div>
       </div>
     </div>

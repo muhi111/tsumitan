@@ -1,7 +1,7 @@
-import React from 'react';
 import { useAtomValue } from 'jotai';
+import type React from 'react';
 import { Navigate } from 'react-router-dom';
-import { authUserAtom, authLoadingAtom } from '../atoms';
+import { authLoadingAtom, authUserAtom } from '../atoms';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -9,10 +9,10 @@ interface AuthGuardProps {
   redirectTo?: string;
 }
 
-const AuthGuard: React.FC<AuthGuardProps> = ({ 
-  children, 
-  requireAuth = false, 
-  redirectTo = '/auth' 
+const AuthGuard: React.FC<AuthGuardProps> = ({
+  children,
+  requireAuth = false,
+  redirectTo = '/auth'
 }) => {
   const authUser = useAtomValue(authUserAtom);
   const authLoading = useAtomValue(authLoadingAtom);

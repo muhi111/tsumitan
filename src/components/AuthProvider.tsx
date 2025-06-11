@@ -1,8 +1,14 @@
-import React, { useEffect } from 'react';
-import { useSetAtom } from 'jotai';
 import { onAuthStateChanged, signInAnonymously } from 'firebase/auth';
+import { useSetAtom } from 'jotai';
+import type React from 'react';
+import { useEffect } from 'react';
+import {
+  type AuthUser,
+  authErrorAtom,
+  authLoadingAtom,
+  authUserAtom
+} from '../atoms';
 import { auth } from '../firebase/config';
-import { authUserAtom, authLoadingAtom, authErrorAtom, type AuthUser } from '../atoms';
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -30,7 +36,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               email: user.email,
               displayName: user.displayName,
               photoURL: user.photoURL,
-              isAnonymous: user.isAnonymous,
+              isAnonymous: user.isAnonymous
             };
             setAuthUser(authUser);
           } else {
@@ -42,7 +48,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 email: result.user.email,
                 displayName: result.user.displayName,
                 photoURL: result.user.photoURL,
-                isAnonymous: result.user.isAnonymous,
+                isAnonymous: result.user.isAnonymous
               };
               setAuthUser(authUser);
             } catch (anonymousSignInError) {

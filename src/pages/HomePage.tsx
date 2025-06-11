@@ -1,14 +1,14 @@
-import { useAtomValue } from "jotai";
-import { useEffect } from "react";
-import { searchResultAtom, searchErrorAtom } from "../atoms";
+import { useAtomValue } from 'jotai';
+import { useEffect } from 'react';
+import { searchErrorAtom, searchResultAtom } from '../atoms';
 
 const HomePage = () => {
   const searchResult = useAtomValue(searchResultAtom);
   const searchError = useAtomValue(searchErrorAtom); // ← エラーも取得
 
   useEffect(() => {
-    console.log("🔍 [HomePage] searchResult:", searchResult);
-    console.log("⚠️ [HomePage] searchError:", searchError);
+    console.log('🔍 [HomePage] searchResult:', searchResult);
+    console.log('⚠️ [HomePage] searchError:', searchError);
   }, [searchResult, searchError]);
 
   return (
@@ -22,7 +22,7 @@ const HomePage = () => {
           </h2>
           <ul className="list-disc pl-6 space-y-2 text-slate-800 leading-relaxed">
             {searchResult.meanings
-              .split(" / ")
+              .split(' / ')
               .map((meaning: string, index: number) => (
                 <li key={index}>{meaning}</li>
               ))}

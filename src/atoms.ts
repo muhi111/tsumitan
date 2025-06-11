@@ -1,9 +1,9 @@
-import { atom } from "jotai";
+import { atom } from 'jotai';
 
 //初期の単語表示用
 export const searchErrorAtom = atom<string | null>(null); // ← エラー用の新しい Atom
 
-export const search = atom('') //検索キーワードをおく
+export const search = atom(''); //検索キーワードをおく
 
 // 認証関連の型定義
 export type AuthUser = {
