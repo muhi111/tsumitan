@@ -1,10 +1,16 @@
 import { useAtomValue } from 'jotai';
 import type React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authUserAtom } from '../atoms';
 
 const ProfilePage: React.FC = () => {
   // Firebase認証ユーザー情報を取得
   const authUser = useAtomValue(authUserAtom);
+  const navigate = useNavigate();
+
+  const handleCreateAccount = () => {
+    navigate('/auth');
+  };
 
   if (!authUser) {
     return (
@@ -104,7 +110,8 @@ const ProfilePage: React.FC = () => {
                   匿名ユーザーとしてログインしています。アカウントを作成すると学習データを永続化できます。
                 </p>
                 <button
-                  onClick={() => (window.location.href = '#/auth')}
+                  type="button"
+                  onClick={handleCreateAccount}
                   className="text-sm bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors"
                 >
                   アカウントを作成

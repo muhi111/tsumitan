@@ -31,5 +31,10 @@
       "quoteStyle": "single",
       "attributePosition": "auto"
     }
+  },
+  "json": {
+    "parser": {
+      "allowComments": true
+    }
   }
 }

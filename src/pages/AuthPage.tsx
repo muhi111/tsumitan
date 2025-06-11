@@ -29,6 +29,7 @@ const AuthPage: React.FC = () => {
           {/* タブ切り替え */}
           <div className="flex mb-6">
             <button
+              type="button"
               onClick={() => setMode('signin')}
               className={`flex-1 py-2 px-4 text-center rounded-l-lg border ${
                 mode === 'signin'
@@ -39,6 +40,7 @@ const AuthPage: React.FC = () => {
               サインイン
             </button>
             <button
+              type="button"
               onClick={() => setMode('signup')}
               className={`flex-1 py-2 px-4 text-center rounded-r-lg border ${
                 mode === 'signup'
@@ -69,6 +71,7 @@ const AuthPage: React.FC = () => {
                 </div>
               </div>
               <button
+                type="button"
                 onClick={handleContinueAsAnonymous}
                 className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
               >

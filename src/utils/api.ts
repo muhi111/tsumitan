@@ -27,7 +27,7 @@ const getAuthToken = async (): Promise<string | null> => {
  */
 interface ApiRequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
-  body?: any;
+  body?: unknown;
   headers?: Record<string, string>;
 }
 
@@ -84,7 +84,7 @@ export const apiGet = async (endpoint: string): Promise<Response> => {
  */
 export const apiPost = async (
   endpoint: string,
-  body?: any
+  body?: unknown
 ): Promise<Response> => {
   return apiRequest(endpoint, { method: 'POST', body });
 };
@@ -94,7 +94,7 @@ export const apiPost = async (
  */
 export const apiPatch = async (
   endpoint: string,
-  body?: any
+  body?: unknown
 ): Promise<Response> => {
   return apiRequest(endpoint, { method: 'PATCH', body });
 };

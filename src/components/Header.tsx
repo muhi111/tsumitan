@@ -56,7 +56,7 @@ const Header = () => {
           }
           throw new Error('意味の取得に失敗');
         }
-        if (getRes.status == 200) {
+        if (getRes.status === 200) {
           const data = await getRes.json();
           console.log('🔍 検索結果データ:', data);
           setSearchResult(data);
@@ -112,6 +112,7 @@ const Header = () => {
                   {authUser.displayName || authUser.email}
                 </span>
                 <button
+                  type="button"
                   onClick={handleSignOut}
                   className="text-sm text-slate-600 hover:text-slate-800 px-3 py-1 rounded-md hover:bg-slate-100"
                 >
@@ -120,6 +121,7 @@ const Header = () => {
               </div>
             ) : (
               <button
+                type="button"
                 onClick={handleAuthAction}
                 className="text-sm bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
               >
