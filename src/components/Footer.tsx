@@ -46,9 +46,18 @@ const Footer = () => {
 
       `}
     >
-      {/* PCサイドバー時に表示するロゴやタイトル（任意） */}
+      {/* PCサイドバー時に表示するロゴ */}
       <div className="hidden lg:block p-4 border-b border-slate-200 text-center">
-        <h1 className="text-xl  text-slate-700">積み単</h1>
+        <Link
+          to="/home"
+          className="inline-block hover:opacity-80 transition-opacity"
+        >
+          <img
+            src="/icons/icon-192x192.png"
+            alt="積み単ロゴ"
+            className="w-16 h-16 mx-auto"
+          />
+        </Link>
       </div>
 
       <nav
