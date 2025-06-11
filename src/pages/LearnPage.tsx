@@ -1,5 +1,7 @@
 import type React from 'react';
 import { useCallback, useEffect, useState } from 'react';
+import CardStack from '../components/CardStack';
+import { useFeedback } from '../hooks/useFeedback';
 import { apiGet, apiPatch } from '../utils/api';
 
 type Status = 'all' | 'unchecked' | 'correct' | 'wrong';
@@ -20,10 +22,13 @@ interface ReviewRequest {
 
 const LearnPage: React.FC = () => {
   const [words, setWords] = useState<WordWithStatus[]>([]);
-  const [flippedStates, setFlippedStates] = useState<boolean[]>([]);
   const [showStatus, setShowStatus] = useState<Status>('all');
-  const [feedback, setFeedback] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isCompleted, setIsCompleted] = useState<boolean>(false);
+
+  // Use the custom feedback hook
+  const { feedback, showFeedback } = useFeedback();
+
   const cleanMeaning = useCallback((text: string): string => {
     return text
       .replace(/\([^)]*\)/g, '') // 半角かっこ (…)
@@ -85,7 +90,6 @@ const LearnPage: React.FC = () => {
         console.log('✅ filtered（意味あり & search_count降順）', filtered);
 
         setWords(filtered);
-        setFlippedStates(new Array(filtered.length).fill(false));
       } catch (err) {
         console.error('単語取得エラー:', err);
       } finally {
@@ -96,46 +100,29 @@ const LearnPage: React.FC = () => {
     fetchAllWords();
   }, [fetchMeaning]);
 
-  const visibleWords = words
-    .map((word, index) => ({ ...word, index }))
-    .filter(({ status }) =>
-      showStatus === 'all' ? true : status === showStatus
-    );
+  const visibleWords = words.filter(({ status }) =>
+    showStatus === 'all' ? true : status === showStatus
+  );
 
-  const toggleFlip = (index: number) => {
-    setFlippedStates((prev) => {
-      const updated = [...prev];
-      updated[index] = !updated[index];
-      return updated;
-    });
-  };
+  const handleCardSwipe = async (word: string, direction: 'left' | 'right') => {
+    const newStatus: Status = direction === 'right' ? 'correct' : 'wrong';
 
-  const handleCardKeyDown = (event: React.KeyboardEvent, index: number) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      toggleFlip(index);
-    }
-  };
-
-  const updateStatus = async (
-    index: number,
-    newStatus: 'correct' | 'wrong'
-  ) => {
-    const wordToUpdate = words[index];
+    // Update the word status in local state
     setWords((prev) => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], status: newStatus };
+      const updated = prev.map((w) =>
+        w.word === word ? { ...w, status: newStatus } : w
+      );
       return updated;
     });
 
-    setFeedback(
+    showFeedback(
       newStatus === 'correct'
         ? '✅ よくできました！この調子✨'
         : '❌ 間違えても大丈夫！次に活かそう💪'
     );
 
     try {
-      const requestBody: ReviewRequest = { word: wordToUpdate.word };
+      const requestBody: ReviewRequest = { word };
       const response = await apiPatch('/api/review', requestBody);
 
       if (!response.ok) throw new Error('復習記録の送信に失敗しました');
@@ -144,12 +131,13 @@ const LearnPage: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    if (feedback) {
-      const timeout = setTimeout(() => setFeedback(null), 2000);
-      return () => clearTimeout(timeout);
+  const handleStackComplete = () => {
+    // Show completion message only once
+    if (!isCompleted) {
+      showFeedback('🎉 すべての復習が完了しました！');
+      setIsCompleted(true);
     }
-  }, [feedback]);
+  };
 
   const statusLabels: Record<Status, string> = {
     all: 'すべて',
@@ -159,97 +147,54 @@ const LearnPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 relative">
-      <h2 className="text-2xl font-bold mb-4">単語帳</h2>
-
+    <div className="relative h-full flex flex-col overflow-hidden">
+      {/* Feedback Overlay */}
       {feedback && (
-        <div className="absolute top-4 right-4 bg-white border border-blue-300 text-blue-700 px-4 py-2 rounded shadow-md animate-fade-in">
+        <div className="fixed top-4 right-4 z-50 bg-white border border-blue-300 text-blue-700 px-4 py-3 rounded-lg shadow-lg backdrop-blur-sm animate-fade-in text-sm font-medium whitespace-nowrap">
           {feedback}
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2 mb-4">
-        {(Object.keys(statusLabels) as Status[]).map((status) => (
-          <button
-            type="button"
-            key={status}
-            className={`px-4 py-2 rounded ${
-              showStatus === status ? 'bg-blue-600 text-white' : 'bg-gray-200'
-            }`}
-            onClick={() => {
-              setShowStatus(status);
-              setFlippedStates(new Array(words.length).fill(false));
-            }}
-          >
-            {statusLabels[status]}
-          </button>
-        ))}
+      {/* Header section - optimized layout */}
+      <div className="flex-shrink-0 px-4 pt-3 pb-2 bg-slate-50 border-b border-gray-200">
+        <div className="flex items-center justify-center mb-3">
+          <h2 className="text-2xl font-bold">単語帳</h2>
+        </div>
+
+        <div className="flex gap-1 sm:gap-2">
+          {(Object.keys(statusLabels) as Status[]).map((status) => (
+            <button
+              type="button"
+              key={status}
+              className={`flex-1 sm:flex-initial sm:px-3 py-2 rounded text-xs sm:text-sm font-medium whitespace-nowrap ${
+                showStatus === status
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700'
+              }`}
+              onClick={() => {
+                setShowStatus(status);
+              }}
+            >
+              {statusLabels[status]}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {loading ? (
-        <p>読み込み中...</p>
-      ) : (
-        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {visibleWords.map(({ word, meaning, index }) => (
-            <li
-              key={index}
-              onClick={() => toggleFlip(index)}
-              onKeyDown={(e) => handleCardKeyDown(e, index)}
-              aria-label={`単語カード: ${word}`}
-              className="cursor-pointer perspective"
-            >
-              <div
-                className="relative w-full h-48 preserve-3d transition-transform duration-500"
-                style={{
-                  transform: flippedStates[index] ? 'rotateY(180deg)' : 'none'
-                }}
-              >
-                <div className="absolute w-full h-full backface-hidden bg-white border rounded-xl flex items-center justify-center text-lg font-bold shadow">
-                  {word}
-                </div>
-                <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-blue-600 text-white border rounded-xl relative flex flex-col p-4 shadow">
-                  {/* 意味エリア */}
-                  <div className="flex-1 overflow-y-auto mb-3 pr-2">
-                    <div className="text-center whitespace-pre-line">
-                      {meaning || '意味が取得できませんでした'}
-                    </div>
-                  </div>
-
-                  {/* ボタン + 検索回数 */}
-                  <div className="flex justify-between items-center flex-shrink-0">
-                    <div className="flex space-x-2">
-                      <button
-                        type="button"
-                        className="bg-green-500 text-white text-sm px-3 py-1 rounded"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          updateStatus(index, 'correct');
-                        }}
-                      >
-                        ◯
-                      </button>
-                      <button
-                        type="button"
-                        className="bg-red-500 text-white text-sm px-3 py-1 rounded"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          updateStatus(index, 'wrong');
-                        }}
-                      >
-                        ✕
-                      </button>
-                    </div>
-
-                    <div className="text-sm text-white opacity-100">
-                      🔍 {words[index].search_count}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* Main content area */}
+      <div className="flex-1 overflow-hidden">
+        {loading ? (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-gray-500">読み込み中...</p>
+          </div>
+        ) : (
+          <CardStack
+            words={visibleWords}
+            onCardSwipe={handleCardSwipe}
+            onComplete={handleStackComplete}
+          />
+        )}
+      </div>
     </div>
   );
 };
