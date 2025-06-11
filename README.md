@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="./public/icons/icon-512x512.png" alt="積み単ロゴ" width="120" height="120">
+</div>
+
 # 積み単 (tsumitan)
 
 スマートフォン最適化された英単語学習アプリケーション
