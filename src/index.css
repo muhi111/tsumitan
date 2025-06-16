@@ -1,5 +1,13 @@
 .h-safe-area-bottom {
   height: env(safe-area-inset-bottom);
+  min-height: env(safe-area-inset-bottom);
+}
+
+/* Ensure safe area padding is always applied */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-area-padding {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 }
 
 /* Mobile viewport height fix */
@@ -8,14 +16,10 @@
   height: 100dvh; /* Dynamic viewport height for mobile browsers */
 }
 
-/* Safe area adjustments for mobile */
+/* Safe area adjustments for mobile - remove bottom inset since footer handles it */
 @supports (height: 100dvh) {
   .h-screen {
-    height: calc(
-      100dvh -
-      env(safe-area-inset-top) -
-      env(safe-area-inset-bottom)
-    );
+    height: 100dvh;
   }
 }
 
@@ -55,17 +59,17 @@ button {
   min-height: 44px; /* iOS recommended touch target size */
 }
 
-/* Card container responsive sizing - accurate calculations including all components */
+/* Card container responsive sizing - updated for fixed footer */
 .card-container {
   height: calc(100vh - 340px); /* Default for desktop */
 }
 
-/* Mobile - includes footer height and safe area */
+/* Mobile - updated for fixed footer positioning */
 @media (max-width: 1023px) {
   .card-container {
-    height: calc(100vh - 430px); /* App(96px) + LearnHeader(80px) + Progress(50px) + Instructions(55px) + CardBottom(48px) + Footer(95px) + margin(6px) */
+    height: calc(100dvh - 328px); /* App(96px) + LearnHeader(80px) + Progress(50px) + Instructions(55px) + CardBottom(48px) + margin(11px) - updated for accurate footer */
     min-height: 250px;
-    max-height: calc(100vh - 410px); /* Ensure no overflow */
+    max-height: calc(100dvh - 308px); /* Ensure no overflow */
   }
 }
 
@@ -80,18 +84,18 @@ button {
 /* Very small devices - extra safe margins */
 @media (max-width: 375px) {
   .card-container {
-    height: calc(100vh - 440px);
+    height: calc(100dvh - 350px);
     min-height: 220px;
-    max-height: calc(100vh - 420px);
+    max-height: calc(100dvh - 330px);
   }
 }
 
-/* Support for dynamic viewport height */
+/* Support for dynamic viewport height with safe area */
 @supports (height: 100dvh) {
   @media (max-width: 1023px) {
     .card-container {
-      height: calc(100dvh - 430px - env(safe-area-inset-bottom));
-      max-height: calc(100dvh - 410px - env(safe-area-inset-bottom));
+      height: calc(100dvh - 340px - env(safe-area-inset-bottom));
+      max-height: calc(100dvh - 320px - env(safe-area-inset-bottom));
     }
   }
 

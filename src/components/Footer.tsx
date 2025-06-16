@@ -49,7 +49,7 @@ const Footer = () => {
   const location = useLocation();
 
   return (
-    <footer className="flex-shrink-0 bg-slate-50/80 backdrop-blur-sm border-t border-slate-200">
+    <footer className="fixed bottom-0 left-0 right-0 z-50 bg-slate-50/95 backdrop-blur-sm border-t border-slate-200">
       <nav className="flex justify-around px-2 py-3 max-w-screen-xl mx-auto">
         {navItems.map(({ icon, label, path }) => {
           const isActive = location.pathname === path;
@@ -70,7 +70,7 @@ const Footer = () => {
           );
         })}
       </nav>
-      <div className="h-safe-area-bottom bg-slate-50 min-h-[env(safe-area-inset-bottom)]" />
+      <div className="h-safe-area-bottom bg-slate-50/95 safe-area-padding" />
     </footer>
   );
 };

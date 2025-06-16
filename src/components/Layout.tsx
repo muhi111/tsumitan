@@ -43,15 +43,17 @@ const Layout = ({ children, showHeader = false }: LayoutProps) => {
         className="lg:hidden h-full overflow-hidden flex flex-col"
         style={{
           height: showHeader
-            ? `calc(100vh - ${LAYOUT_CONSTANTS.HEADER_HEIGHT}px)`
-            : '100vh'
+            ? `calc(100dvh - ${LAYOUT_CONSTANTS.HEADER_HEIGHT}px)`
+            : '100dvh'
         }}
       >
-        <main
-          className="flex-1 overflow-y-auto"
-          style={{ paddingBottom: '0px' }}
-        >
-          <div className="container mx-auto px-4 py-6 sm:px-6 md:px-10 max-w-7xl h-full">
+        <main className="flex-1 overflow-y-auto">
+          <div
+            className="container mx-auto px-4 py-6 sm:px-6 md:px-10 max-w-7xl h-full"
+            style={{
+              paddingBottom: `calc(${LAYOUT_CONSTANTS.MOBILE_FOOTER_HEIGHT}px + env(safe-area-inset-bottom))`
+            }}
+          >
             {children}
           </div>
         </main>

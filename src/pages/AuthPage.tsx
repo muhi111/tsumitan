@@ -23,8 +23,8 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-full bg-slate-50 flex items-center justify-center p-4 lg:items-start lg:pt-8 lg:pb-16">
-      <div className="max-w-md w-full space-y-8">
+    <div className="h-full bg-slate-50 flex items-center justify-center p-4 lg:items-start lg:pt-8 lg:pb-16 overflow-y-auto">
+      <div className="max-w-md w-full space-y-8 my-auto lg:my-0">
         <div className="bg-white rounded-lg shadow-xl border border-slate-200 p-8">
           {/* タブ切り替え */}
           <div className="flex mb-6">
