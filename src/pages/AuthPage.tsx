@@ -23,9 +23,9 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-full bg-slate-50 flex items-center justify-center p-4 lg:items-start lg:pt-8 lg:pb-16">
       <div className="max-w-md w-full space-y-8">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="bg-white rounded-lg shadow-xl border border-slate-200 p-8">
           {/* タブ切り替え */}
           <div className="flex mb-6">
             <button
@@ -73,9 +73,9 @@ const AuthPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleContinueAsAnonymous}
-                className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                className="mt-4 w-full flex items-center justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
               >
-                匿名ユーザーとして続行
+                匿名ユーザーのまま続行
               </button>
               <p className="mt-2 text-xs text-gray-500">
                 後でアカウントを作成して学習データを保存できます

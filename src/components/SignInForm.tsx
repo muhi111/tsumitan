@@ -7,19 +7,26 @@ import {
 import type React from 'react';
 import { useState } from 'react';
 import { auth } from '../firebase/config';
+import type { AuthFormData, AuthFormProps, AuthFormState } from '../types/auth';
+import { getFirebaseErrorMessage } from '../utils/authUtils';
+import ErrorMessage from './auth/ErrorMessage';
+import FormField from './auth/FormField';
+import GoogleSignInButton from './auth/GoogleSignInButton';
 
-interface SignInFormProps {
-  onSuccess?: () => void;
-}
-
-const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
-  const [formData, setFormData] = useState({
+const SignInForm: React.FC<AuthFormProps> = ({ onSuccess }) => {
+  const [formData, setFormData] = useState<
+    Pick<AuthFormData, 'email' | 'password'>
+  >({
     email: '',
     password: ''
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>('');
-  const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [state, setState] = useState<
+    AuthFormState & { resetEmailSent: boolean }
+  >({
+    loading: false,
+    error: '',
+    resetEmailSent: false
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -28,7 +35,10 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
 
   const validateForm = () => {
     if (!formData.email || !formData.password) {
-      setError('メールアドレスとパスワードを入力してください');
+      setState((prev) => ({
+        ...prev,
+        error: 'メールアドレスとパスワードを入力してください'
+      }));
       return false;
     }
     return true;
@@ -38,8 +48,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    setLoading(true);
-    setError('');
+    setState((prev) => ({ ...prev, loading: true, error: '' }));
 
     try {
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
@@ -48,37 +57,19 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
         onSuccess();
       }
     } catch (error: unknown) {
-      let errorMessage = 'サインインに失敗しました';
-
       const firebaseError = error as { code?: string };
-      switch (firebaseError.code) {
-        case 'auth/user-not-found':
-          errorMessage = 'このメールアドレスは登録されていません';
-          break;
-        case 'auth/wrong-password':
-          errorMessage = 'パスワードが正しくありません';
-          break;
-        case 'auth/invalid-email':
-          errorMessage = '無効なメールアドレスです';
-          break;
-        case 'auth/user-disabled':
-          errorMessage = 'このアカウントは無効になっています';
-          break;
-        case 'auth/too-many-requests':
-          errorMessage =
-            'ログイン試行回数が多すぎます。しばらく待ってから再試行してください';
-          break;
-      }
-
-      setError(errorMessage);
+      const errorMessage = getFirebaseErrorMessage(
+        firebaseError.code || '',
+        'signin'
+      );
+      setState((prev) => ({ ...prev, error: errorMessage }));
     } finally {
-      setLoading(false);
+      setState((prev) => ({ ...prev, loading: false }));
     }
   };
 
   const handleGoogleSignIn = async () => {
-    setLoading(true);
-    setError('');
+    setState((prev) => ({ ...prev, loading: true, error: '' }));
 
     try {
       const provider = new GoogleAuthProvider();
@@ -88,52 +79,40 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
         onSuccess();
       }
     } catch (error: unknown) {
-      let errorMessage = 'Googleアカウントでのサインインに失敗しました';
-
       const firebaseError = error as { code?: string };
-      switch (firebaseError.code) {
-        case 'auth/account-exists-with-different-credential':
-          errorMessage = 'このメールアドレスは別の方法で既に登録されています';
-          break;
-        case 'auth/popup-closed-by-user':
-          errorMessage = 'ポップアップがキャンセルされました';
-          break;
-      }
-
-      setError(errorMessage);
+      const errorMessage = getFirebaseErrorMessage(
+        firebaseError.code || '',
+        'signin'
+      );
+      setState((prev) => ({ ...prev, error: errorMessage }));
     } finally {
-      setLoading(false);
+      setState((prev) => ({ ...prev, loading: false }));
     }
   };
 
   const handlePasswordReset = async () => {
     if (!formData.email) {
-      setError('パスワードリセットには、まずメールアドレスを入力してください');
+      setState((prev) => ({
+        ...prev,
+        error: 'パスワードリセットには、まずメールアドレスを入力してください'
+      }));
       return;
     }
 
-    setLoading(true);
-    setError('');
+    setState((prev) => ({ ...prev, loading: true, error: '' }));
 
     try {
       await sendPasswordResetEmail(auth, formData.email);
-      setResetEmailSent(true);
+      setState((prev) => ({ ...prev, resetEmailSent: true }));
     } catch (error: unknown) {
-      let errorMessage = 'パスワードリセットメールの送信に失敗しました';
-
       const firebaseError = error as { code?: string };
-      switch (firebaseError.code) {
-        case 'auth/user-not-found':
-          errorMessage = 'このメールアドレスは登録されていません';
-          break;
-        case 'auth/invalid-email':
-          errorMessage = '無効なメールアドレスです';
-          break;
-      }
-
-      setError(errorMessage);
+      const errorMessage = getFirebaseErrorMessage(
+        firebaseError.code || '',
+        'reset'
+      );
+      setState((prev) => ({ ...prev, error: errorMessage }));
     } finally {
-      setLoading(false);
+      setState((prev) => ({ ...prev, loading: false }));
     }
   };
 
@@ -146,13 +125,9 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
         </p>
       </div>
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-sm text-red-600">{error}</p>
-        </div>
-      )}
+      {state.error && <ErrorMessage message={state.error} />}
 
-      {resetEmailSent && (
+      {state.resetEmailSent && (
         <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
           <p className="text-sm text-green-600">
             パスワードリセットメールを送信しました。メールボックスをご確認ください。
@@ -161,49 +136,33 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
       )}
 
       <form onSubmit={handleEmailSignIn} className="space-y-4">
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            メールアドレス
-          </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={loading}
-            required
-          />
-        </div>
+        <FormField
+          id="email"
+          name="email"
+          type="email"
+          label="メールアドレス"
+          value={formData.email}
+          onChange={handleChange}
+          disabled={state.loading}
+          required
+        />
 
-        <div>
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            パスワード
-          </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={loading}
-            required
-          />
-        </div>
+        <FormField
+          id="password"
+          name="password"
+          type="password"
+          label="パスワード"
+          value={formData.password}
+          onChange={handleChange}
+          disabled={state.loading}
+          required
+        />
 
         <div className="flex items-center justify-between">
           <button
             type="button"
             onClick={handlePasswordReset}
-            disabled={loading}
+            disabled={state.loading}
             className="text-sm text-blue-600 hover:text-blue-500 disabled:opacity-50"
           >
             パスワードを忘れた場合
@@ -212,10 +171,10 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={state.loading}
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
         >
-          {loading ? 'サインイン中...' : 'サインイン'}
+          {state.loading ? 'サインイン中...' : 'サインイン'}
         </button>
       </form>
 
@@ -229,33 +188,12 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess }) => {
           </div>
         </div>
 
-        <button
-          type="button"
+        <GoogleSignInButton
           onClick={handleGoogleSignIn}
-          disabled={loading}
-          className="mt-4 w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+          disabled={state.loading}
         >
-          <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" aria-label="Google">
-            <title>Google</title>
-            <path
-              fill="#4285F4"
-              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-            />
-            <path
-              fill="#34A853"
-              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-            />
-            <path
-              fill="#FBBC05"
-              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-            />
-            <path
-              fill="#EA4335"
-              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-            />
-          </svg>
           Googleアカウントでサインイン
-        </button>
+        </GoogleSignInButton>
       </div>
     </div>
   );

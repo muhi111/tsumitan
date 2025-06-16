@@ -98,7 +98,23 @@ const CardStack: React.FC<CardStackProps> = ({
   if (completedCards.size === words.length) {
     return (
       <div className="flex flex-col items-center justify-center h-96 space-y-4">
-        <div className="text-6xl">🎉</div>
+        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
+          <svg
+            className="w-10 h-10 text-green-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            role="img"
+            aria-label="完了"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
         <h3 className="text-2xl font-bold text-green-600">お疲れ様でした！</h3>
         <p className="text-gray-600">すべての単語の復習が完了しました</p>
       </div>
@@ -108,7 +124,7 @@ const CardStack: React.FC<CardStackProps> = ({
   return (
     <div className="h-full flex flex-col">
       {/* Progress indicator - restored to separate area */}
-      <div className="flex-shrink-0 px-4 py-3">
+      <div className="flex-shrink-0 px-4 py-2">
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm text-gray-600">進捗</span>
           <span className="text-sm text-gray-600">
@@ -124,7 +140,7 @@ const CardStack: React.FC<CardStackProps> = ({
       </div>
 
       {/* Instructions - Fixed height to prevent card position shifting */}
-      <div className="flex-shrink-0 text-center px-2 sm:px-4 pb-3 h-20 sm:h-16 flex items-center justify-center">
+      <div className="flex-shrink-0 text-center px-2 sm:px-4 pb-2 h-16 sm:h-12 flex items-center justify-center">
         {flippedStates[currentIndex] ? (
           <div className="w-full max-w-sm sm:max-w-lg mx-auto">
             {/* Mobile layout - stacked */}
@@ -195,15 +211,17 @@ const CardStack: React.FC<CardStackProps> = ({
 
       {/* Card stack area - responsive sizing */}
       <div
-        className="flex-1 flex items-center justify-center px-4 pb-6"
+        className="flex-1 flex items-center justify-center px-4 pb-4"
         style={{ minHeight: 0 }}
       >
-        <div className="relative w-full max-w-none lg:max-w-2xl">
+        <div className="relative w-full max-w-none lg:max-w-2xl h-full">
           <div
             className="card-container"
             style={{
               width: '100%',
-              maxWidth: '600px', // Large on desktop
+              height: '100%',
+              maxWidth: '500px',
+              maxHeight: '400px',
               margin: '0 auto'
             }}
           >

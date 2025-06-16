@@ -101,14 +101,14 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
           }}
         >
           {/* Front side - Word */}
-          <div className="absolute w-full h-full backface-hidden bg-white border-2 border-gray-200 rounded-2xl flex items-center justify-center text-xl sm:text-2xl lg:text-3xl font-bold shadow-lg">
-            <div className="text-center p-4 sm:p-6 lg:p-8">{word}</div>
+          <div className="absolute w-full h-full backface-hidden bg-white border-2 border-gray-200 rounded-2xl flex items-center justify-center text-lg sm:text-xl lg:text-2xl font-bold shadow-lg">
+            <div className="text-center p-3 sm:p-4 lg:p-6">{word}</div>
           </div>
 
           {/* Back side - Meaning */}
-          <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-blue-600 text-white border-2 border-blue-700 rounded-2xl flex flex-col p-4 sm:p-6 lg:p-8 shadow-lg">
-            <div className="flex-1 overflow-y-auto mb-3 sm:mb-4 flex items-center justify-center">
-              <div className="text-center text-base sm:text-lg lg:text-xl leading-relaxed">
+          <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-blue-600 text-white border-2 border-blue-700 rounded-2xl flex flex-col p-3 sm:p-4 lg:p-6 shadow-lg">
+            <div className="flex-1 overflow-y-auto mb-2 sm:mb-3 flex items-center justify-center">
+              <div className="text-center text-sm sm:text-base lg:text-lg leading-relaxed">
                 {meaning || '意味が取得できませんでした'}
               </div>
             </div>
