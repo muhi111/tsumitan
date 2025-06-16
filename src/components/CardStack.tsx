@@ -90,7 +90,7 @@ const CardStack: React.FC<CardStackProps> = ({
   if (words.length === 0) {
     return (
       <div className="flex items-center justify-center h-96">
-        <p className="text-gray-500 text-lg">復習する単語がありません</p>
+        <p className="text-slate-500 text-lg">復習する単語がありません</p>
       </div>
     );
   }
@@ -116,7 +116,7 @@ const CardStack: React.FC<CardStackProps> = ({
           </svg>
         </div>
         <h3 className="text-2xl font-bold text-green-600">お疲れ様でした！</h3>
-        <p className="text-gray-600">すべての単語の復習が完了しました</p>
+        <p className="text-slate-600">すべての単語の復習が完了しました</p>
       </div>
     );
   }
@@ -126,12 +126,12 @@ const CardStack: React.FC<CardStackProps> = ({
       {/* Progress indicator - restored to separate area */}
       <div className="flex-shrink-0 px-4 py-2">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm text-gray-600">進捗</span>
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-slate-600">進捗</span>
+          <span className="text-sm text-slate-600">
             {completedCards.size} / {words.length}
           </span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-slate-200 rounded-full h-2">
           <div
             className="bg-blue-600 h-2 rounded-full transition-all duration-300"
             style={{ width: `${(completedCards.size / words.length) * 100}%` }}
@@ -164,7 +164,7 @@ const CardStack: React.FC<CardStackProps> = ({
               </div>
 
               {/* Center instruction for mobile */}
-              <div className="flex items-center justify-center space-x-1 text-gray-500">
+              <div className="flex items-center justify-center space-x-1 text-slate-500">
                 <span className="material-icons text-sm">swipe</span>
                 <div className="text-xs font-medium">スワイプして回答</div>
               </div>
@@ -182,7 +182,7 @@ const CardStack: React.FC<CardStackProps> = ({
               </div>
 
               {/* Center instruction */}
-              <div className="flex-1 px-4 text-gray-500">
+              <div className="flex-1 px-4 text-slate-500">
                 <div className="text-xs font-medium">スワイプして回答</div>
                 <div className="flex justify-center mt-1">
                   <span className="material-icons text-sm">swipe</span>

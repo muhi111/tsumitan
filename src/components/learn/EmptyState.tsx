@@ -10,9 +10,9 @@ const EmptyState: React.FC<EmptyStateProps> = ({ currentStatus }) => {
   return (
     <div className="flex justify-center h-full items-start pt-8 lg:pt-16">
       <div className="text-center px-4">
-        <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+        <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
           <svg
-            className="w-8 h-8 text-gray-400"
+            className="w-8 h-8 text-slate-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -26,12 +26,12 @@ const EmptyState: React.FC<EmptyStateProps> = ({ currentStatus }) => {
             />
           </svg>
         </div>
-        <p className="text-gray-600 font-medium mb-2">
+        <p className="text-slate-600 font-medium mb-2">
           {currentStatus === 'all'
             ? '復習する単語がありません'
             : `${statusLabels[currentStatus]}の単語がありません`}
         </p>
-        <p className="text-gray-500 text-sm">
+        <p className="text-slate-500 text-sm">
           {currentStatus !== 'all'
             ? '他のカテゴリを確認してみてください'
             : '新しい単語を検索して学習を始めましょう'}

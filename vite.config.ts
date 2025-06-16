@@ -1,3 +1,4 @@
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -7,6 +8,7 @@ export default defineConfig({
   base: '/',
   plugins: [
     react(),
+    tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
@@ -33,5 +35,10 @@ export default defineConfig({
         enabled: false // 開発時はオフ（本番ビルドにのみ影響）
       }
     })
-  ]
+  ],
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    allowedHosts: ['03c8-119-243-156-218.ngrok-free.app']
+  }
 });

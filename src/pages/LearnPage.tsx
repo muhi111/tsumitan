@@ -53,7 +53,7 @@ const LearnPage: React.FC = () => {
       )}
 
       {/* Header section - optimized layout */}
-      <div className="flex-shrink-0 bg-slate-50 border-b border-gray-200">
+      <div className="flex-shrink-0 bg-slate-50 border-b border-slate-200">
         <div className="container mx-auto px-4 py-2 max-w-7xl">
           <div className="flex items-center justify-center mb-2">
             <h2 className="text-xl sm:text-2xl font-bold">単語帳</h2>

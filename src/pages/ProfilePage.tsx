@@ -15,7 +15,7 @@ const ProfilePage: React.FC = () => {
   if (!authUser) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-xl text-gray-700">認証情報が見つかりません。</p>
+        <p className="text-xl text-slate-700">認証情報が見つかりません。</p>
       </div>
     );
   }
@@ -23,7 +23,7 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
       <div className="flex-grow">
-        <header className="sticky top-0 z-10 bg-gray-50/80 backdrop-blur-md">
+        <header className="sticky top-0 z-10 bg-slate-50/80 backdrop-blur-md">
           <div className="flex items-center p-4 pb-3">
             <h1 className="text-slate-900 text-xl font-bold leading-tight tracking-tight flex-1 text-center pr-10">
               Profile

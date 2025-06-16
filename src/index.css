@@ -1,31 +1,68 @@
-.h-safe-area-bottom {
-  height: env(safe-area-inset-bottom);
-  min-height: env(safe-area-inset-bottom);
-}
+@import "tailwindcss";
 
-/* Ensure safe area padding is always applied */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .safe-area-padding {
-    padding-bottom: env(safe-area-inset-bottom);
+@theme {
+  /* Custom fonts to match existing design */
+  --font-sans: "Newsreader", "Noto Sans", sans-serif;
+
+  /* Layout constants from layout.ts */
+  --spacing-header-height: 96px;
+  --spacing-sidebar-width: 256px;
+  --spacing-footer-mobile: 78px;
+
+  /* Layout calculations - exact same as current inline styles */
+  --spacing-main-desktop-with-header: calc(100vh - 96px);
+  --spacing-main-mobile-with-header: calc(100dvh - 96px);
+  --spacing-content-mobile-padding: calc(78px + env(safe-area-inset-bottom));
+
+  /* Custom spacing for safe area and card calculations */
+  --spacing-safe-area-bottom: env(safe-area-inset-bottom);
+  --spacing-card-base: calc(100vh - 340px);
+  --spacing-card-mobile: calc(100dvh - 328px);
+  --spacing-card-mobile-max: calc(100dvh - 308px);
+  --spacing-card-mobile-small: calc(100dvh - 350px);
+  --spacing-card-mobile-small-max: calc(100dvh - 330px);
+  --spacing-card-mobile-safe: calc(100dvh - 340px - env(safe-area-inset-bottom));
+  --spacing-card-mobile-safe-max: calc(
+    100dvh -
+    320px -
+    env(safe-area-inset-bottom)
+  );
+
+  /* Custom animation for fade-in */
+  --animate-fade-in: fade-in 0.3s ease-out;
+
+  /* 3D transformation utilities */
+  --perspective-card: 1000px;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 }
 
-/* Mobile viewport height fix */
+/* Utility classes for safe area support */
+.h-safe-area-bottom {
+  height: var(--spacing-safe-area-bottom);
+  min-height: var(--spacing-safe-area-bottom);
+}
+
+.safe-area-padding {
+  padding-bottom: var(--spacing-safe-area-bottom);
+}
+
+/* Enhanced mobile viewport height fix */
 .h-screen {
   height: 100vh;
   height: 100dvh; /* Dynamic viewport height for mobile browsers */
 }
 
-/* Safe area adjustments for mobile - remove bottom inset since footer handles it */
-@supports (height: 100dvh) {
-  .h-screen {
-    height: 100dvh;
-  }
-}
-
-/* 3D Flip 用のユーティリティクラスを定義 */
+/* 3D Flip utilities - optimized for TailwindCSS v4 */
 .perspective {
-  perspective: 1000px;
+  perspective: var(--perspective-card);
 }
 
 .preserve-3d {
@@ -40,62 +77,57 @@
   transform: rotateY(180deg);
 }
 
-/* Fade-in animation for feedback messages */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
+/* Fade-in animation utility */
 .animate-fade-in {
-  animation: fade-in 0.3s ease-out;
+  animation: var(--animate-fade-in);
 }
 
-/* Ensure touch targets are appropriately sized */
+/* Touch target sizing for accessibility */
 button {
   min-height: 44px; /* iOS recommended touch target size */
 }
 
-/* Card container responsive sizing - updated for fixed footer */
+/* Optimized card container with TailwindCSS v4 variables */
 .card-container {
-  height: calc(100vh - 340px); /* Default for desktop */
+  height: var(--spacing-card-base);
 }
 
-/* Mobile - updated for fixed footer positioning */
+/* Responsive card sizing - mobile */
 @media (max-width: 1023px) {
   .card-container {
-    height: calc(100dvh - 328px); /* App(96px) + LearnHeader(80px) + Progress(50px) + Instructions(55px) + CardBottom(48px) + margin(11px) - updated for accurate footer */
+    height: var(--spacing-card-mobile);
     min-height: 250px;
-    max-height: calc(100dvh - 308px); /* Ensure no overflow */
+    max-height: var(--spacing-card-mobile-max);
   }
 }
 
-/* Desktop - no footer interference, but includes App padding */
+/* Desktop sizing */
 @media (min-width: 1024px) {
   .card-container {
-    height: calc(100vh - 340px); /* App(96px) + LearnHeader(80px) + Progress(50px) + Instructions(55px) + CardBottom(48px) + margin(11px) */
+    height: var(--spacing-card-base);
     min-height: 400px;
   }
 }
 
-/* Very small devices - extra safe margins */
+/* Very small devices */
 @media (max-width: 375px) {
   .card-container {
-    height: calc(100dvh - 350px);
+    height: var(--spacing-card-mobile-small);
     min-height: 220px;
-    max-height: calc(100dvh - 330px);
+    max-height: var(--spacing-card-mobile-small-max);
   }
 }
 
-/* Support for dynamic viewport height with safe area */
+/* Enhanced safe area support with dynamic viewport height */
 @supports (height: 100dvh) {
+  .h-screen {
+    height: 100dvh;
+  }
+
   @media (max-width: 1023px) {
     .card-container {
-      height: calc(100dvh - 340px - env(safe-area-inset-bottom));
-      max-height: calc(100dvh - 320px - env(safe-area-inset-bottom));
+      height: var(--spacing-card-mobile-safe);
+      max-height: var(--spacing-card-mobile-safe-max);
     }
   }
 
