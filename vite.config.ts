@@ -35,10 +35,5 @@ export default defineConfig({
         enabled: false // 開発時はオフ（本番ビルドにのみ影響）
       }
     })
-  ],
-  server: {
-    host: '0.0.0.0',
-    port: 5173,
-    allowedHosts: ['03c8-119-243-156-218.ngrok-free.app']
-  }
+  ]
 });
