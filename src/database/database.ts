@@ -4,10 +4,11 @@ import { type DBSchema, type IDBPDatabase, openDB } from 'idb';
 export interface Word {
   userID: string;
   word: string;
+  meaning: string;
   searchCount: number;
   reviewCount: number;
-  correctCount: number; // 新規: 正解数
-  wrongCount: number; // 新規: 不正解数
+  correctCount: number;
+  wrongCount: number;
   lastReviewed: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -28,7 +29,7 @@ interface TsumitanDB extends DBSchema {
 
 // Database name and version
 const DB_NAME = 'tsumitan-db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 // Global database instance
 let db: IDBPDatabase<TsumitanDB> | null = null;
@@ -59,15 +60,17 @@ export async function initDatabase(): Promise<IDBPDatabase<TsumitanDB>> {
 
   db = await openDB<TsumitanDB>(DB_NAME, DB_VERSION, {
     upgrade(database) {
-      // Create words object store
-      const wordsStore = database.createObjectStore('words', {
-        keyPath: ['userID', 'word']
-      });
+      // Create words object store if it doesn't exist
+      if (!database.objectStoreNames.contains('words')) {
+        const wordsStore = database.createObjectStore('words', {
+          keyPath: ['userID', 'word']
+        });
 
-      // Create indexes
-      wordsStore.createIndex('by-user', 'userID');
-      wordsStore.createIndex('by-last-reviewed', 'lastReviewed');
-      wordsStore.createIndex('by-search-count', 'searchCount');
+        // Create indexes
+        wordsStore.createIndex('by-user', 'userID');
+        wordsStore.createIndex('by-last-reviewed', 'lastReviewed');
+        wordsStore.createIndex('by-search-count', 'searchCount');
+      }
     }
   });
 

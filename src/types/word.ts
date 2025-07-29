@@ -1,15 +1,14 @@
 import type { Status } from '../utils/wordUtils';
 
-export type Word = {
+// Frontend Word type (simplified for UI)
+type FrontendWord = {
   word: string;
+  meaning: string;
   searchCount: number;
   reviewCount?: number;
   lastReviewed?: string;
-  meaning?: string;
+  correctCount?: number;
+  wrongCount?: number;
 };
 
-export type WordWithStatus = Word & { status: Status };
-
-export interface ReviewRequest {
-  word: string;
-}
+export type WordWithStatus = FrontendWord & { status: Status };

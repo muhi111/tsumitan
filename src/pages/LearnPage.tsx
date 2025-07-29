@@ -2,7 +2,6 @@ import type React from 'react';
 import { useState } from 'react';
 import CardStack from '../components/CardStack';
 import EmptyState from '../components/learn/EmptyState';
-import LoadingState from '../components/learn/LoadingState';
 import StatusFilter from '../components/learn/StatusFilter';
 import { useFeedback } from '../hooks/useFeedback';
 import { useWordManagement } from '../hooks/useWordManagement';
@@ -14,25 +13,33 @@ const LearnPage: React.FC = () => {
 
   // Use custom hooks
   const { feedback, showFeedback } = useFeedback();
-  const { loading, updateWordStatus, submitReview, getFilteredWords } =
-    useWordManagement();
+  const {
+    updateWordStatus,
+    getFilteredWords,
+    recordCorrectAnswer,
+    recordWrongAnswer
+  } = useWordManagement();
 
   const visibleWords = getFilteredWords(showStatus);
 
   const handleCardSwipe = async (word: string, direction: 'left' | 'right') => {
-    const newStatus: Status = direction === 'right' ? 'correct' : 'wrong';
+    const newStatus: Status = direction === 'right' ? 'reviewed' : 'wrong';
 
     // Update the word status in local state
     updateWordStatus(word, newStatus);
 
     showFeedback(
-      newStatus === 'correct'
+      newStatus === 'reviewed'
         ? 'よくできました！この調子です'
         : '間違えても大丈夫！次に活かしましょう'
     );
 
-    // Submit review to API
-    await submitReview(word);
+    // Record correct or wrong answer with count update
+    if (direction === 'right') {
+      await recordCorrectAnswer(word);
+    } else {
+      await recordWrongAnswer(word);
+    }
   };
 
   const handleStackComplete = () => {
@@ -68,9 +75,7 @@ const LearnPage: React.FC = () => {
 
       {/* Main content area */}
       <div className="flex-1 overflow-hidden">
-        {loading ? (
-          <LoadingState />
-        ) : visibleWords.length === 0 ? (
+        {visibleWords.length === 0 ? (
           <EmptyState currentStatus={showStatus} />
         ) : (
           <CardStack

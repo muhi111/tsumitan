@@ -7,11 +7,11 @@ export const cleanMeaning = (text: string): string => {
     .trim();
 };
 
-export type Status = 'all' | 'unchecked' | 'correct' | 'wrong';
+export type Status = 'all' | 'unchecked' | 'reviewed' | 'wrong';
 
 export const statusLabels: Record<Status, string> = {
   all: 'すべて',
   unchecked: '未復習',
-  correct: '復習済み',
+  reviewed: '復習済み',
   wrong: '苦手'
 };

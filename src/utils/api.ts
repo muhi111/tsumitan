@@ -2,12 +2,9 @@ import { initDatabase } from '../database/database';
 import {
   type PendingReview,
   type ReviewHistory,
-  type WordDetail,
   createOrUpdateWordSearch,
   getPendingReviews,
   getReviewHistory,
-  getWordInfo,
-  getWordsByStatus,
   recordCorrectAnswer,
   recordWrongAnswer,
   updateWordReview
@@ -75,18 +72,19 @@ export async function searchWord(
     throw new Error('必須フィールドが不足しています');
   }
 
-  // Check if word meaning exists
+  // Get word meaning from API
+  let meanings = '';
   try {
-    const meanings = await fetchWordMeaning(word);
-    if (!meanings) {
-      throw new Error('意味の取得に失敗しました');
+    meanings = await fetchWordMeaning(word);
+    if (!meanings || meanings.trim() === '') {
+      throw new Error('意味が空です');
     }
   } catch (error) {
     throw new Error('意味の取得に失敗しました');
   }
 
-  // Record search in IndexedDB
-  await createOrUpdateWordSearch(word);
+  // Record search in IndexedDB with meaning
+  await createOrUpdateWordSearch(word, meanings);
 
   return { message: '検索が記録されました' };
 }
@@ -148,24 +146,6 @@ export async function getReviewHistoryApi(): Promise<ReviewHistory[]> {
 }
 
 /**
- * Get word details (GET /api/word/:word equivalent)
- */
-export async function getWordDetails(word: string): Promise<WordDetail> {
-  await dbInitPromise;
-
-  if (!word) {
-    throw new Error('単語が指定されていません');
-  }
-
-  const wordInfo = await getWordInfo(word);
-  if (!wordInfo) {
-    throw new Error('単語が見つかりません');
-  }
-
-  return wordInfo;
-}
-
-/**
  * Record a correct answer for a word
  */
 export async function recordCorrect(word: string): Promise<void> {
@@ -179,14 +159,4 @@ export async function recordCorrect(word: string): Promise<void> {
 export async function recordWrong(word: string): Promise<void> {
   await dbInitPromise;
   await recordWrongAnswer(word);
-}
-
-/**
- * Get words filtered by status
- */
-export async function getFilteredWordsByStatus(
-  status: 'unchecked' | 'correct' | 'wrong' | 'all'
-) {
-  await dbInitPromise;
-  return await getWordsByStatus(status);
 }

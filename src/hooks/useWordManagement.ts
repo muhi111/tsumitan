@@ -3,31 +3,16 @@ import type { WordWithStatus } from '../types/word';
 import {
   getPendingReviewsApi,
   getReviewHistoryApi,
-  getWordMeaning,
   recordCorrect,
   recordWrong,
   reviewWord
 } from '../utils/api';
 import type { Status } from '../utils/wordUtils';
-import { cleanMeaning } from '../utils/wordUtils';
 
 export const useWordManagement = () => {
   const [words, setWords] = useState<WordWithStatus[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
 
-  // 意味取得API
-  const fetchMeaning = useCallback(async (word: string): Promise<string> => {
-    try {
-      const data = await getWordMeaning(word);
-      const rawMeaning = data.meanings || '';
-      return cleanMeaning(rawMeaning);
-    } catch (err) {
-      console.error(`意味取得失敗 (${word}):`, err);
-      return '';
-    }
-  }, []);
-
-  // 単語＋意味の取得
+  // 単語＋意味の取得（DBから意味も取得）
   const fetchAllWords = useCallback(async () => {
     try {
       const [pendingWords, reviewedWords] = await Promise.all([
@@ -35,41 +20,36 @@ export const useWordManagement = () => {
         getReviewHistoryApi()
       ]);
 
-      const allWords = [
+      const allWords: WordWithStatus[] = [
         ...pendingWords.map((w) => ({
           word: w.word,
+          meaning: w.meaning,
           searchCount: w.searchCount,
           status: 'unchecked' as const
         })),
         ...reviewedWords.map((w) => ({
           word: w.word,
+          meaning: w.meaning,
           searchCount: w.searchCount,
           reviewCount: w.reviewCount,
           lastReviewed: w.lastReviewed,
-          status: 'correct' as const
+          correctCount: w.correctCount,
+          wrongCount: w.wrongCount,
+          status: 'reviewed' as const
         }))
       ];
 
-      const withMeanings = await Promise.all(
-        allWords.map(async (w) => ({
-          ...w,
-          meaning: await fetchMeaning(w.word)
-        }))
+      // search_count降順でソート
+      const sorted = allWords.sort(
+        (a, b) => (b.searchCount ?? 0) - (a.searchCount ?? 0)
       );
 
-      // 意味がある単語だけ残す
-      const filtered = withMeanings
-        .filter((w) => w.meaning && w.meaning.trim() !== '')
-        .sort((a, b) => (b.searchCount ?? 0) - (a.searchCount ?? 0));
-
-      console.log('✅ filtered（意味あり & search_count降順）', filtered);
-      setWords(filtered);
+      console.log('✅ sorted（search_count降順）', sorted);
+      setWords(sorted);
     } catch (err) {
       console.error('単語取得エラー:', err);
-    } finally {
-      setLoading(false);
     }
-  }, [fetchMeaning]);
+  }, []);
 
   // 復習記録の送信
   const submitReview = useCallback(async (word: string): Promise<void> => {
@@ -121,9 +101,35 @@ export const useWordManagement = () => {
   // 指定されたステータスの単語をフィルタリング
   const getFilteredWords = useCallback(
     (showStatus: Status): WordWithStatus[] => {
-      return words.filter(({ status }) =>
-        showStatus === 'all' ? true : status === showStatus
-      );
+      if (showStatus === 'all') {
+        return words;
+      }
+
+      if (showStatus === 'reviewed') {
+        // 復習済み = 一度でも復習した単語すべて
+        return words.filter((word) => (word.reviewCount ?? 0) > 0);
+      }
+
+      if (showStatus === 'wrong') {
+        // 苦手 = 復習済みで正答率が低い単語
+        return words.filter((word) => {
+          const correctCount = word.correctCount ?? 0;
+          const wrongCount = word.wrongCount ?? 0;
+          const totalReviews = correctCount + wrongCount;
+
+          // 復習していない、または復習回数が少ない場合は除外
+          if (totalReviews < 2) {
+            return false;
+          }
+
+          // 正答率が70%未満なら苦手
+          const accuracy = correctCount / totalReviews;
+          return accuracy < 0.7;
+        });
+      }
+
+      // unchecked = 未復習
+      return words.filter((word) => (word.reviewCount ?? 0) === 0);
     },
     [words]
   );
@@ -134,7 +140,6 @@ export const useWordManagement = () => {
 
   return {
     words,
-    loading,
     updateWordStatus,
     submitReview,
     getFilteredWords,

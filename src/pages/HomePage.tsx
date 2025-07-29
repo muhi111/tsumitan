@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { useEffect } from 'react';
 import { search, searchErrorAtom, searchResultAtom } from '../atoms';
 import { getWordMeaning, searchWord } from '../utils/api';
+import { cleanMeaning } from '../utils/wordUtils';
 
 const HomePage = () => {
   const [searchValue, setSearchValue] = useAtom(search);
@@ -87,7 +88,7 @@ const HomePage = () => {
             </h2>
             <ul className="list-disc pl-6 space-y-2 text-slate-800 leading-relaxed">
               {searchResult.meanings.split(' / ').map((meaning: string) => (
-                <li key={meaning}>{meaning}</li>
+                <li key={meaning}>{cleanMeaning(meaning)}</li>
               ))}
             </ul>
           </div>

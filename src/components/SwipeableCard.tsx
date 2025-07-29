@@ -2,6 +2,7 @@ import { useDrag } from '@use-gesture/react';
 import type React from 'react';
 import { useState } from 'react';
 import { animated, useSpring } from 'react-spring';
+import { cleanMeaning } from '../utils/wordUtils';
 
 interface SwipeableCardProps {
   word: string;
@@ -109,7 +110,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
           <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-blue-600 text-white border-2 border-blue-700 rounded-2xl flex flex-col p-3 sm:p-4 lg:p-6 shadow-lg">
             <div className="flex-1 overflow-y-auto mb-2 sm:mb-3 flex items-center justify-center">
               <div className="text-center text-sm sm:text-base lg:text-lg leading-relaxed">
-                {meaning || '意味が取得できませんでした'}
+                {meaning ? cleanMeaning(meaning) : '意味が取得できませんでした'}
               </div>
             </div>
 
