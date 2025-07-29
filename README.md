@@ -1,5 +1,5 @@
 > [!NOTE]
-> このリポジトリは、技育ハッカソンvol6で作成したプロジェクト「積み単」を、バックエンドが不要な形に改修したものです。(もとのリポジトリは[こちら](https://github.com/orgs/geek-hackathon-vol6-team20/repositories))
+> このリポジトリは、技育ハッカソンvol6で作成したプロジェクト「積み単」を、バックエンドが不要な形に改修したものです。(もとのリポジトリなどは[こちら](https://github.com/orgs/geek-hackathon-vol6-team20/repositories))
 
 <div align="center">
   <img src="./public/icons/icon-512x512.png" alt="積み単ロゴ" width="120" height="120">
@@ -24,18 +24,14 @@
 
 ## 技術スタック
 
-### フロントエンド
 - **React**
 - **TypeScript**
 - **Vite**
-- **Jotai**
 - **Tailwind CSS**
 - **Biome**
-- **lefthook**
-
-### デプロイ
-- **Cloudflare Pages Functions** - 辞書API プロキシ（CORS回避）
-- **Cloudflare Pages** - フロントエンドホスティング
+- **Lefthook**
+- **Cloudflare Pages**
+- **Cloudflare Pages Functions** - CORSエラー回避のためのプロキシサーバー
 
 ## 関連リポジトリ・デプロイ先
 
@@ -82,8 +78,7 @@ src/
 └── main.tsx        # エントリーポイント
 
 functions/
-├── dictionary.ts   # Cloudflare Pages Functions（辞書API）
-└── _middleware.ts  # ミドルウェア設定
+└── dictionary.ts   # Cloudflare Pages Functions（辞書API）
 ```
 
 ## 開発
@@ -95,4 +90,10 @@ npm run dev      # 開発サーバー起動
 npm run build    # プロダクションビルド
 npm run preview  # プロダクションビルドのプレビュー
 npm run check    # Biomeのコードチェック
+```
+
+### Lefthookの有効化
+
+```bash
+npx lefthook install
 ```
