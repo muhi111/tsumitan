@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ReviewRequest, Word, WordWithStatus } from '../types/word';
-import { apiGet, apiPatch } from '../utils/api';
+import type { WordWithStatus } from '../types/word';
+import {
+  getPendingReviewsApi,
+  getReviewHistoryApi,
+  getWordMeaning,
+  recordCorrect,
+  recordWrong,
+  reviewWord
+} from '../utils/api';
 import type { Status } from '../utils/wordUtils';
 import { cleanMeaning } from '../utils/wordUtils';
 
@@ -11,9 +18,7 @@ export const useWordManagement = () => {
   // 意味取得API
   const fetchMeaning = useCallback(async (word: string): Promise<string> => {
     try {
-      const res = await apiGet(`/api/search?word=${encodeURIComponent(word)}`);
-      if (!res.ok) throw new Error('意味の取得に失敗');
-      const data = await res.json();
+      const data = await getWordMeaning(word);
       const rawMeaning = data.meanings || '';
       return cleanMeaning(rawMeaning);
     } catch (err) {
@@ -25,20 +30,24 @@ export const useWordManagement = () => {
   // 単語＋意味の取得
   const fetchAllWords = useCallback(async () => {
     try {
-      const [pendingRes, reviewedRes] = await Promise.all([
-        apiGet('/api/review/pending'),
-        apiGet('/api/review/history')
+      const [pendingWords, reviewedWords] = await Promise.all([
+        getPendingReviewsApi(),
+        getReviewHistoryApi()
       ]);
 
-      if (!pendingRes.ok || !reviewedRes.ok)
-        throw new Error('単語取得に失敗しました');
-
-      const pendingWords: Word[] = await pendingRes.json();
-      const reviewedWords: Word[] = await reviewedRes.json();
-
       const allWords = [
-        ...pendingWords.map((w) => ({ ...w, status: 'unchecked' as const })),
-        ...reviewedWords.map((w) => ({ ...w, status: 'correct' as const }))
+        ...pendingWords.map((w) => ({
+          word: w.word,
+          searchCount: w.searchCount,
+          status: 'unchecked' as const
+        })),
+        ...reviewedWords.map((w) => ({
+          word: w.word,
+          searchCount: w.searchCount,
+          reviewCount: w.reviewCount,
+          lastReviewed: w.lastReviewed,
+          status: 'correct' as const
+        }))
       ];
 
       const withMeanings = await Promise.all(
@@ -51,7 +60,7 @@ export const useWordManagement = () => {
       // 意味がある単語だけ残す
       const filtered = withMeanings
         .filter((w) => w.meaning && w.meaning.trim() !== '')
-        .sort((a, b) => (b.search_count ?? 0) - (a.search_count ?? 0));
+        .sort((a, b) => (b.searchCount ?? 0) - (a.searchCount ?? 0));
 
       console.log('✅ filtered（意味あり & search_count降順）', filtered);
       setWords(filtered);
@@ -65,10 +74,7 @@ export const useWordManagement = () => {
   // 復習記録の送信
   const submitReview = useCallback(async (word: string): Promise<void> => {
     try {
-      const requestBody: ReviewRequest = { word };
-      const response = await apiPatch('/api/review', requestBody);
-
-      if (!response.ok) throw new Error('復習記録の送信に失敗しました');
+      await reviewWord({ word });
     } catch (err) {
       console.error('復習記録送信エラー:', err);
     }
@@ -83,6 +89,34 @@ export const useWordManagement = () => {
       return updated;
     });
   }, []);
+
+  // 正解を記録
+  const recordCorrectAnswer = useCallback(
+    async (word: string) => {
+      try {
+        await recordCorrect(word);
+        // データを再取得してステータスを更新
+        await fetchAllWords();
+      } catch (err) {
+        console.error(`正解記録失敗 (${word}):`, err);
+      }
+    },
+    [fetchAllWords]
+  );
+
+  // 不正解を記録
+  const recordWrongAnswer = useCallback(
+    async (word: string) => {
+      try {
+        await recordWrong(word);
+        // データを再取得してステータスを更新
+        await fetchAllWords();
+      } catch (err) {
+        console.error(`不正解記録失敗 (${word}):`, err);
+      }
+    },
+    [fetchAllWords]
+  );
 
   // 指定されたステータスの単語をフィルタリング
   const getFilteredWords = useCallback(
@@ -103,6 +137,8 @@ export const useWordManagement = () => {
     loading,
     updateWordStatus,
     submitReview,
-    getFilteredWords
+    getFilteredWords,
+    recordCorrectAnswer,
+    recordWrongAnswer
   };
 };

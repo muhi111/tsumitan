@@ -1,13 +1,7 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
+import type { WordWithStatus } from '../types/word';
 import SwipeableCard from './SwipeableCard';
-
-interface WordWithStatus {
-  word: string;
-  meaning?: string;
-  search_count: number;
-  status: 'all' | 'unchecked' | 'correct' | 'wrong';
-}
 
 interface CardStackProps {
   words: WordWithStatus[];
@@ -230,7 +224,7 @@ const CardStack: React.FC<CardStackProps> = ({
                 key={card.index}
                 word={card.word}
                 meaning={card.meaning}
-                searchCount={card.search_count}
+                searchCount={card.searchCount}
                 isFlipped={flippedStates[card.index] || false}
                 onFlip={() => handleCardFlip(card.index)}
                 onSwipe={

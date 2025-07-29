@@ -8,8 +8,7 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   { icon: 'home', label: 'Home', path: '/home' },
-  { icon: 'school', label: 'Learn', path: '/learn' },
-  { icon: 'person_outline', label: 'Profile', path: '/profile' }
+  { icon: 'school', label: 'Learn', path: '/learn' }
 ];
 
 // デスクトップサイドバー用のコンポーネント

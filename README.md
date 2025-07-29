@@ -1,3 +1,6 @@
+> [!NOTE]
+> このリポジトリは、技育ハッカソンvol6で作成したプロジェクト「積み単」を、バックエンドが不要な形に改修したものです。(もとのリポジトリは[こちら](https://github.com/orgs/geek-hackathon-vol6-team20/repositories))
+
 <div align="center">
   <img src="./public/icons/icon-512x512.png" alt="積み単ロゴ" width="120" height="120">
 </div>
@@ -15,32 +18,28 @@
 - 🔍 **単語検索と自動単語帳追加** - 検索した単語が自動的に個人の単語帳に保存
 - 📊 **学習データ記録** - 検索回数や復習回数を追跡し学習効率を向上
 - 🎯 **最適化された単語帳** - 学習データに基づいて最適な復習単語を提示
-- 👤 **匿名認証** - Firebase匿名認証によりログイン不要で利用可能
+- 🗄️ **ローカルストレージ** - IndexedDBによるオフラインのデータ保存
 - 📱 **スマートフォン最適化** - スマートフォンでの使用を想定したUI設計
 - 🔧 **PWA対応** - ホーム画面への追加やオフライン機能をサポート
 
 ## 技術スタック
 
 ### フロントエンド
-- **React** - UIライブラリ
-- **TypeScript** - 型安全な開発
-- **Vite** - 高速ビルドツール
-- **React Router DOM** - SPA ルーティング
-- **Jotai** - 状態管理
-- **Tailwind CSS** - スタイリング
-- **Biome** - コードフォーマッター・リンター
-
-### バックエンド・認証
-- **Firebase** - 認証・匿名ログイン
-- **REST API** - バックエンドサーバーとの連携
+- **React**
+- **TypeScript**
+- **Vite**
+- **Jotai**
+- **Tailwind CSS**
+- **Biome**
+- **lefthook**
 
 ### デプロイ
-- **GitHub Pages** - フロントエンドホスティング
+- **Cloudflare Pages Functions** - 辞書API プロキシ（CORS回避）
+- **Cloudflare Pages** - フロントエンドホスティング
 
 ## 関連リポジトリ・デプロイ先
 
-- **デプロイ先**: [tsumitan.me](https://tsumitan.me)
-- **バックエンドリポジトリ**: https://github.com/geek-hackathon-vol6-team20/tsumitan-backend
+- **デプロイ先**: https://tsumitan.muhi111.com
 
 ## セットアップ
 
@@ -52,29 +51,12 @@
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/yourusername/tsumitan-frontend.git
-cd tsumitan-frontend
+git clone https://github.com/muhi111/tsumitan.git
+cd tsumitan
 
 # 依存関係をインストール
 npm install
 ```
-
-### 環境変数設定
-
-`.env.example` を参考に `.env` ファイルを作成し、必要な環境変数を設定してください。
-
-```bash
-cp .env.example .env
-```
-
-必要な環境変数:
-- `VITE_FIREBASE_API_KEY` - Firebase API キー
-- `VITE_FIREBASE_AUTH_DOMAIN` - Firebase 認証ドメイン
-- `VITE_FIREBASE_PROJECT_ID` - Firebase プロジェクト ID
-- `VITE_FIREBASE_STORAGE_BUCKET` - Firebase ストレージバケット
-- `VITE_FIREBASE_MESSAGING_SENDER_ID` - Firebase メッセージング送信者 ID
-- `VITE_FIREBASE_APP_ID` - Firebase アプリ ID
-- `VITE_API_BASE_URL` - バックエンド API のベース URL
 
 ### 開発サーバー起動
 
@@ -82,7 +64,7 @@ cp .env.example .env
 npm run dev
 ```
 
-開発サーバーが `http://localhost:5173` で起動します。
+開発サーバーが `http://localhost:8788` で起動します。
 
 ## プロジェクト構造
 
@@ -90,27 +72,19 @@ npm run dev
 src/
 ├── components/     # 再利用可能なUIコンポーネント
 ├── pages/          # ページコンポーネント
-├── firebase/       # Firebase設定
-├── utils/          # ユーティリティ
+├── database/       # IndexedDB操作
+├── utils/          # ユーティリティ・API
 ├── types/          # TypeScript型定義
+├── hooks/          # カスタムReactフック
+├── config/         # ルーティング設定
 ├── atoms.ts        # Jotai状態管理
 ├── App.tsx         # アプリケーションルート
 └── main.tsx        # エントリーポイント
+
+functions/
+├── dictionary.ts   # Cloudflare Pages Functions（辞書API）
+└── _middleware.ts  # ミドルウェア設定
 ```
-
-## ビルド・デプロイ
-
-### プロダクションビルド
-
-```bash
-npm run build
-```
-
-### GitHub Pages デプロイ
-
-このプロジェクトは GitHub Actions を使用して自動的に GitHub Pages にデプロイされます。
-
-`.github/workflows/deploy.yml` が設定済みで、メインブランチへの push 時に自動デプロイが実行されます。
 
 ## 開発
 

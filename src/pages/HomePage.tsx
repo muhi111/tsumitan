@@ -2,11 +2,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import type { FormEvent } from 'react';
 import { useEffect } from 'react';
 import { search, searchErrorAtom, searchResultAtom } from '../atoms';
-import { apiGet, apiPost } from '../utils/api';
-
-type SearchRequest = {
-  word: string;
-};
+import { getWordMeaning, searchWord } from '../utils/api';
 
 const HomePage = () => {
   const [searchValue, setSearchValue] = useAtom(search);
@@ -22,44 +18,24 @@ const HomePage = () => {
     e.preventDefault();
     if (!searchValue.trim()) return;
 
-    const requestBody: SearchRequest = { word: searchValue };
-    console.log('検索語:', requestBody.word);
+    console.log('検索語:', searchValue);
     try {
-      const res = await apiPost('/api/search', requestBody);
+      // Record search and get word meaning
+      await searchWord({ word: searchValue });
 
-      if (res.status === 200) {
-        // POST成功 → GETで意味取得
-        const getRes = await apiGet(
-          `/api/search?word=${encodeURIComponent(requestBody.word)}`
-        );
-        if (!getRes.ok) {
-          if (getRes.status === 404) {
-            setSearchResult(null);
-            alert('単語が見つかりませんでした');
-            return;
-          }
-          throw new Error('意味の取得に失敗');
-        }
-        if (getRes.status === 200) {
-          const data = await getRes.json();
-          console.log('🔍 検索結果データ:', data);
-          setSearchResult(data);
-        }
-      } else {
-        const errorData = await res.json();
-        console.error('検索POST失敗:', errorData);
-
-        if (res.status === 404) {
-          setSearchResult(null);
-          alert('単語が見つかりませんでした');
-        } else {
-          alert('検索に失敗しました');
-        }
-      }
+      // Get word meaning
+      const data = await getWordMeaning(searchValue);
+      console.log('🔍 検索結果データ:', data);
+      setSearchResult(data);
     } catch (err: unknown) {
       console.error('検索中にエラー:', err);
+      setSearchResult(null);
       if (err instanceof Error) {
-        alert(`検索中にエラーが発生しました: ${err.message}`);
+        if (err.message.includes('意味の取得に失敗')) {
+          alert('単語が見つかりませんでした');
+        } else {
+          alert(`検索中にエラーが発生しました: ${err.message}`);
+        }
       } else {
         alert('予期しないエラーが発生しました');
       }

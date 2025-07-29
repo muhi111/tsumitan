@@ -2,9 +2,9 @@ import type { Status } from '../utils/wordUtils';
 
 export type Word = {
   word: string;
-  search_count: number;
-  review_count?: number;
-  last_reviewed?: string;
+  searchCount: number;
+  reviewCount?: number;
+  lastReviewed?: string;
   meaning?: string;
 };
 

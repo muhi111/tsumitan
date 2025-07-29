@@ -1,114 +1,192 @@
-import { auth } from '../firebase/config';
-
-// API base URL from environment variables
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-
-/**
- * Get the current user's authentication token
- */
-const getAuthToken = async (): Promise<string | null> => {
-  const currentUser = auth.currentUser;
-  if (!currentUser) {
-    return null;
-  }
-
-  try {
-    const token = await currentUser.getIdToken();
-    return token;
-  } catch (error) {
-    console.error('Failed to get auth token:', error);
-    return null;
-  }
-};
+import { initDatabase } from '../database/database';
+import {
+  type PendingReview,
+  type ReviewHistory,
+  type WordDetail,
+  createOrUpdateWordSearch,
+  getPendingReviews,
+  getReviewHistory,
+  getWordInfo,
+  getWordsByStatus,
+  recordCorrectAnswer,
+  recordWrongAnswer,
+  updateWordReview
+} from '../database/wordOperations';
 
 /**
- * API request configuration interface
+ * Initialize the database when the API is first used
  */
-interface ApiRequestOptions {
-  method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
-  body?: unknown;
-  headers?: Record<string, string>;
+const dbInitPromise = initDatabase();
+
+/**
+ * Dictionary API response type
+ */
+interface DictionaryResponse {
+  word: string;
+  meanings: string;
 }
 
 /**
- * Make an authenticated API request
+ * Search request type
  */
-const apiRequest = async (
-  endpoint: string,
-  options: ApiRequestOptions = {}
-): Promise<Response> => {
-  const { method = 'GET', body, headers = {} } = options;
+interface SearchRequest {
+  word: string;
+}
 
-  // Get authentication token
-  const token = await getAuthToken();
+/**
+ * Review request type
+ */
+interface ReviewRequest {
+  word: string;
+}
 
-  // Prepare headers
-  const requestHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...headers
-  };
-
-  // Add authentication header if token is available
-  if (token) {
-    requestHeaders.Authorization = `Bearer ${token}`;
+/**
+ * Fetch word meaning from dictionary API using Cloudflare Pages Functions proxy
+ * This function uses our own /api/dictionary endpoint to avoid CORS issues
+ */
+async function fetchWordMeaning(word: string): Promise<string> {
+  if (!word) {
+    throw new Error('単語が指定されていません');
   }
 
-  // Prepare request configuration
-  const requestConfig: RequestInit = {
-    method,
-    headers: requestHeaders
-  };
+  const proxyUrl = `/dictionary?word=${encodeURIComponent(word)}`;
 
-  // Add body for non-GET requests
-  if (body && method !== 'GET') {
-    requestConfig.body = JSON.stringify(body);
+  const response = await fetch(proxyUrl);
+
+  if (!response.ok) {
+    throw new Error(`辞書APIステータスエラー: ${response.status}`);
   }
 
-  // Make the request
-  const url = `${API_BASE_URL}${endpoint}`;
-  const response = await fetch(url, requestConfig);
-
-  return response;
-};
+  const meanings = await response.text();
+  return meanings;
+}
 
 /**
- * Convenience method for GET requests
+ * Search for a word and record the search (POST /api/search equivalent)
  */
-export const apiGet = async (endpoint: string): Promise<Response> => {
-  return apiRequest(endpoint, { method: 'GET' });
-};
+export async function searchWord(
+  request: SearchRequest
+): Promise<{ message: string }> {
+  await dbInitPromise;
+
+  const { word } = request;
+
+  if (!word) {
+    throw new Error('必須フィールドが不足しています');
+  }
+
+  // Check if word meaning exists
+  try {
+    const meanings = await fetchWordMeaning(word);
+    if (!meanings) {
+      throw new Error('意味の取得に失敗しました');
+    }
+  } catch (error) {
+    throw new Error('意味の取得に失敗しました');
+  }
+
+  // Record search in IndexedDB
+  await createOrUpdateWordSearch(word);
+
+  return { message: '検索が記録されました' };
+}
 
 /**
- * Convenience method for POST requests
+ * Get word meaning without recording search (GET /api/search equivalent)
  */
-export const apiPost = async (
-  endpoint: string,
-  body?: unknown
-): Promise<Response> => {
-  return apiRequest(endpoint, { method: 'POST', body });
-};
+export async function getWordMeaning(
+  word: string
+): Promise<DictionaryResponse> {
+  if (!word) {
+    throw new Error('単語パラメータが必要です');
+  }
+
+  const meanings = await fetchWordMeaning(word);
+  if (!meanings) {
+    throw new Error('意味の取得に失敗しました');
+  }
+
+  return {
+    word,
+    meanings
+  };
+}
 
 /**
- * Convenience method for PATCH requests
+ * Get pending reviews (GET /api/review/pending equivalent)
  */
-export const apiPatch = async (
-  endpoint: string,
-  body?: unknown
-): Promise<Response> => {
-  return apiRequest(endpoint, { method: 'PATCH', body });
-};
+export async function getPendingReviewsApi(): Promise<PendingReview[]> {
+  await dbInitPromise;
+  return await getPendingReviews();
+}
 
 /**
- * Convenience method for PUT requests
+ * Record a word review (PATCH /api/review equivalent)
  */
-// const apiPut = async (endpoint: string, body?: any): Promise<Response> => {
-//   return apiRequest(endpoint, { method: 'PUT', body });
-// };
+export async function reviewWord(
+  request: ReviewRequest
+): Promise<{ message: string }> {
+  await dbInitPromise;
+
+  const { word } = request;
+
+  if (!word) {
+    throw new Error('必須フィールドが不足しています');
+  }
+
+  await updateWordReview(word);
+
+  return { message: '復習が記録されました。' };
+}
 
 /**
- * Convenience method for DELETE requests
+ * Get review history (GET /api/review/history equivalent)
  */
-// const apiDelete = async (endpoint: string): Promise<Response> => {
-//   return apiRequest(endpoint, { method: 'DELETE' });
-// };
+export async function getReviewHistoryApi(): Promise<ReviewHistory[]> {
+  await dbInitPromise;
+  return await getReviewHistory();
+}
+
+/**
+ * Get word details (GET /api/word/:word equivalent)
+ */
+export async function getWordDetails(word: string): Promise<WordDetail> {
+  await dbInitPromise;
+
+  if (!word) {
+    throw new Error('単語が指定されていません');
+  }
+
+  const wordInfo = await getWordInfo(word);
+  if (!wordInfo) {
+    throw new Error('単語が見つかりません');
+  }
+
+  return wordInfo;
+}
+
+/**
+ * Record a correct answer for a word
+ */
+export async function recordCorrect(word: string): Promise<void> {
+  await dbInitPromise;
+  await recordCorrectAnswer(word);
+}
+
+/**
+ * Record a wrong answer for a word
+ */
+export async function recordWrong(word: string): Promise<void> {
+  await dbInitPromise;
+  await recordWrongAnswer(word);
+}
+
+/**
+ * Get words filtered by status
+ */
+export async function getFilteredWordsByStatus(
+  status: 'unchecked' | 'correct' | 'wrong' | 'all'
+) {
+  await dbInitPromise;
+  return await getWordsByStatus(status);
+}

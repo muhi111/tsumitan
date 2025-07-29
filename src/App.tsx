@@ -5,7 +5,6 @@ import {
   Routes,
   useLocation
 } from 'react-router-dom';
-import AuthProvider from './components/AuthProvider';
 import { createRouteElement } from './components/RouteRenderer';
 import { getHeaderPaths, routes } from './config/routes';
 
@@ -32,9 +31,7 @@ const AppContent = () => {
 function App() {
   return (
     <HashRouter>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <AppContent />
     </HashRouter>
   );
 }

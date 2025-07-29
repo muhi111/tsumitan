@@ -1,6 +1,5 @@
 import type React from 'react';
 import type { RouteConfig } from '../types/route';
-import AuthGuard from './AuthGuard';
 import Layout from './Layout';
 
 interface RouteRendererProps {
@@ -12,15 +11,11 @@ export const createRouteElement = ({
   route,
   showHeader
 }: RouteRendererProps): React.ReactElement => {
-  const { component: Component, requireAuth = false } = route;
+  const { component: Component } = route;
 
-  const content = requireAuth ? (
-    <AuthGuard requireAuth={true}>
+  return (
+    <Layout showHeader={showHeader}>
       <Component />
-    </AuthGuard>
-  ) : (
-    <Component />
+    </Layout>
   );
-
-  return <Layout showHeader={showHeader}>{content}</Layout>;
 };

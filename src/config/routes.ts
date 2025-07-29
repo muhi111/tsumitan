@@ -1,7 +1,5 @@
-import AuthPage from '../pages/AuthPage';
 import HomePage from '../pages/HomePage';
 import LearnPage from '../pages/LearnPage';
-import ProfilePage from '../pages/ProfilePage';
 import type { RouteConfig } from '../types/route';
 
 export const routes: RouteConfig[] = [
@@ -13,17 +11,6 @@ export const routes: RouteConfig[] = [
   {
     path: '/learn',
     component: LearnPage,
-    showHeader: true
-  },
-  {
-    path: '/profile',
-    component: ProfilePage,
-    requireAuth: true,
-    showHeader: true
-  },
-  {
-    path: '/auth',
-    component: AuthPage,
     showHeader: true
   }
 ];
