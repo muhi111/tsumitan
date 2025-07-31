@@ -25,9 +25,9 @@ const Layout = ({ children, showHeader = false }: LayoutProps) => {
         </div>
 
         {/* メインコンテンツエリア */}
-        <main className="h-full overflow-y-auto flex flex-col">
-          <div className="flex-1">
-            <div className="container mx-auto px-4 py-6 sm:px-6 md:px-10 max-w-7xl h-full">
+        <main className="h-full overflow-hidden flex flex-col">
+          <div className="flex-1 h-full overflow-hidden">
+            <div className="container mx-auto px-4 py-6 sm:px-6 md:px-10 lg:py-8 max-w-7xl h-full">
               {children}
             </div>
           </div>
@@ -40,7 +40,7 @@ const Layout = ({ children, showHeader = false }: LayoutProps) => {
           showHeader ? 'h-[var(--spacing-main-mobile-with-header)]' : 'h-screen'
         }`}
       >
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-hidden">
           <div
             className="container mx-auto px-4 py-6 sm:px-6 md:px-10 max-w-7xl h-full"
             style={{

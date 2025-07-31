@@ -35,7 +35,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
   }));
 
   const bind = useDrag(
-    ({ down, movement: [mx, my], direction: [xDir], velocity: [vx] }) => {
+    ({ down, movement: [mx], direction: [xDir], velocity: [vx] }) => {
       // Only allow swiping when meaning is shown (card is flipped)
       if (!isFlipped) {
         return;
@@ -51,6 +51,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
         // Animate card out of screen
         api.start({
           x: dir * 1000,
+          y: 0, // Keep vertical position fixed during swipe out
           rot: dir * 10,
           scale: 1.1,
           opacity: 0,
@@ -64,12 +65,17 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
 
       setIsDragging(down);
 
+      // Constrain movement to horizontal only with slight vertical curve
+      const constrainedX = down ? mx : 0;
+      const constrainedY = down ? Math.min(Math.abs(mx) * 0.1, 20) : 0; // Slight upward curve based on horizontal movement
+      const rotation = down ? mx / 100 : 0; // Simplified rotation
+
       // Update card position and rotation
       api.start({
-        x: down ? mx : 0,
-        y: down ? my : 0,
-        rot: down ? mx / 100 + (vx > 0 ? vx * 50 : 0) : 0,
-        scale: down ? 1.1 : 1,
+        x: constrainedX,
+        y: constrainedY,
+        rot: rotation,
+        scale: down ? 1.05 : 1, // Slightly less dramatic scale
         opacity: 1,
         immediate: down
       });

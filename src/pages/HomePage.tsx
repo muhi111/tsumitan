@@ -1,6 +1,5 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import type { FormEvent } from 'react';
-import { useEffect } from 'react';
 import { search, searchErrorAtom, searchResultAtom } from '../atoms';
 import { getWordMeaning, searchWord } from '../utils/api';
 import { cleanMeaning } from '../utils/wordUtils';
@@ -43,11 +42,6 @@ const HomePage = () => {
     }
   };
 
-  useEffect(() => {
-    console.log('🔍 [HomePage] searchResult:', searchResult);
-    console.log('⚠️ [HomePage] searchError:', searchError);
-  }, [searchResult, searchError]);
-
   return (
     <div className="h-full flex flex-col max-w-4xl mx-auto">
       {/* 検索フォーム */}
@@ -78,15 +72,15 @@ const HomePage = () => {
       </div>
 
       {/* 検索結果・初期画面 */}
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center overflow-hidden pb-20 lg:pb-0">
         {searchError ? (
           <p className="text-red-600 text-center">{searchError}</p>
         ) : searchResult ? (
-          <div className="bg-white shadow-md p-6 rounded-lg w-full max-w-2xl">
-            <h2 className="text-2xl font-bold text-blue-700 mb-4">
+          <div className="bg-white shadow-md p-6 rounded-lg w-full max-w-2xl max-h-full overflow-hidden flex flex-col">
+            <h2 className="text-2xl font-bold text-blue-700 mb-4 flex-shrink-0">
               {searchResult.word}
             </h2>
-            <ul className="list-disc pl-6 space-y-2 text-slate-800 leading-relaxed">
+            <ul className="list-disc pl-6 space-y-2 text-slate-800 leading-relaxed overflow-y-auto flex-1">
               {searchResult.meanings.split(' / ').map((meaning: string) => (
                 <li key={meaning}>{cleanMeaning(meaning)}</li>
               ))}

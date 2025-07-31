@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CardStack from '../components/CardStack';
 import EmptyState from '../components/learn/EmptyState';
 import StatusFilter from '../components/learn/StatusFilter';
@@ -17,10 +17,16 @@ const LearnPage: React.FC = () => {
     updateWordStatus,
     getFilteredWords,
     recordCorrectAnswer,
-    recordWrongAnswer
+    recordWrongAnswer,
+    refreshWords
   } = useWordManagement();
 
   const visibleWords = getFilteredWords(showStatus);
+
+  // データの初期読み込み
+  useEffect(() => {
+    refreshWords();
+  }, [refreshWords]);
 
   const handleCardSwipe = async (word: string, direction: 'left' | 'right') => {
     const newStatus: Status = direction === 'right' ? 'reviewed' : 'wrong';
@@ -74,7 +80,7 @@ const LearnPage: React.FC = () => {
       </div>
 
       {/* Main content area */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden pb-20 lg:pb-6">
         {visibleWords.length === 0 ? (
           <EmptyState currentStatus={showStatus} />
         ) : (

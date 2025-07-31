@@ -65,13 +65,17 @@ const CardStack: React.FC<CardStackProps> = ({
       const word = words[cardIndex];
 
       if (word && !completedCards.has(cardIndex)) {
+        // Enhanced stacking effects for better visibility
+        const isDesktop = window.innerWidth >= 1024; // lg breakpoint
+
         visibleCards.push({
           ...word,
           index: cardIndex,
           zIndex: maxVisible - i,
-          scale: 1 - i * 0.05,
-          yOffset: i * 10,
-          opacity: 1 - i * 0.2
+          scale: isDesktop ? 1 - i * 0.08 : 1 - i * 0.05, // More pronounced scale on desktop
+          yOffset: isDesktop ? i * 16 : i * 10, // Larger offset on desktop
+          xOffset: isDesktop ? i * 6 : i * 3, // Add horizontal offset for more depth
+          opacity: isDesktop ? 1 - i * 0.25 : 1 - i * 0.2 // More opacity difference on desktop
         });
       }
     }
@@ -237,9 +241,10 @@ const CardStack: React.FC<CardStackProps> = ({
                   width: '100%',
                   height: '100%',
                   zIndex: card.zIndex,
-                  transform: `scale(${card.scale}) translateY(${card.yOffset}px)`,
+                  transform: `scale(${card.scale}) translateY(${card.yOffset}px) translateX(${card.xOffset || 0}px)`,
                   opacity: card.opacity,
-                  pointerEvents: card.index === currentIndex ? 'auto' : 'none'
+                  pointerEvents: card.index === currentIndex ? 'auto' : 'none',
+                  transformOrigin: 'center bottom' // Better stacking visual effect
                 }}
               />
             ))}

@@ -20,14 +20,22 @@ export const useWordManagement = () => {
         getReviewHistoryApi()
       ]);
 
-      const allWords: WordWithStatus[] = [
-        ...pendingWords.map((w) => ({
+      // Mapを使って重複を除去し、最新の情報でマージ
+      const wordMap = new Map<string, WordWithStatus>();
+
+      // まず未復習の単語を追加
+      for (const w of pendingWords) {
+        wordMap.set(w.word, {
           word: w.word,
           meaning: w.meaning,
           searchCount: w.searchCount,
           status: 'unchecked' as const
-        })),
-        ...reviewedWords.map((w) => ({
+        });
+      }
+
+      // 復習済みの単語を追加（既存の場合は上書き）
+      for (const w of reviewedWords) {
+        wordMap.set(w.word, {
           word: w.word,
           meaning: w.meaning,
           searchCount: w.searchCount,
@@ -36,8 +44,11 @@ export const useWordManagement = () => {
           correctCount: w.correctCount,
           wrongCount: w.wrongCount,
           status: 'reviewed' as const
-        }))
-      ];
+        });
+      }
+
+      // Mapから配列に変換
+      const allWords = Array.from(wordMap.values());
 
       // search_count降順でソート
       const sorted = allWords.sort(
@@ -134,6 +145,11 @@ export const useWordManagement = () => {
     [words]
   );
 
+  // データのリフレッシュ機能を追加
+  const refreshWords = useCallback(async () => {
+    await fetchAllWords();
+  }, [fetchAllWords]);
+
   useEffect(() => {
     fetchAllWords();
   }, [fetchAllWords]);
@@ -144,6 +160,7 @@ export const useWordManagement = () => {
     submitReview,
     getFilteredWords,
     recordCorrectAnswer,
-    recordWrongAnswer
+    recordWrongAnswer,
+    refreshWords // 新しく追加
   };
 };
